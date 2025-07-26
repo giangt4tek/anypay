@@ -17,7 +17,7 @@ class InvoiceReport(models.Model):
     pos_local = fields.Char(string='Điểm bán')
     
     account_id = fields.Many2one('t4tek.bank.account', string='Chủ tài khoản', help="Chủ tài khoản giao dịch")
-    bank = fields.char(string='Ngân hàng', store=True, readonly=True)
+    bank = fields.Char(string='Ngân hàng', store=True, readonly=True)
     acc_number = fields.Char(
                  string="Số tài khoản",
                  related='account_id.acc_number',

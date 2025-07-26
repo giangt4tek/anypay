@@ -8,7 +8,7 @@
                 <list string="Danh sách hóa đơn" default_order="payment_time desc" create="0">
                     <field name="invoice_number"/>
                     <field name="invoice_date"/>
-                    <field name="payer_name"/>
+                    <field name="seller_name"/>
                     <field name="amount"/>
                     <!-- <field name="currency_id"/> -->
                     <field name="state"/>
@@ -28,9 +28,9 @@
                     <field name="state" readonly="1"/>
                 </group>
                 <group>
-                    <field name="payer_name"/>
-                    <field name="payer_account"/>
-                    <field name="payer_wallet_code"/>
+                    <field name="seller_name"/>
+                    <field name="seller_account"/>
+                    <field name="seller_bank_code"/>
                     <field name="pos_local"/>
                 </group>
                 <group>
@@ -46,19 +46,7 @@
                     <field name="note"/>
                 </group>
             </sheet>
-            <footer>
-                <button name="payment_from_wallet"
-                        string="Thanh toán từ ví"
-                        type="object"
-                        class="btn-primary"
-                        invisible="state != 'draft'"/>
-                <button string="Xác nhận" type="object" name="set_done"
-                        class="btn-success"
-                        invisible="state != 'draft'" />
-                <button string="Hủy" type="object" name="set_cancel"
-                        class="btn-secondary"
-                        invisible="state != 'done'"/>
-            </footer>
+            
         </form>
     </field>
 </record>

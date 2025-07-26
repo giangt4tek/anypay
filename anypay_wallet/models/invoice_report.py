@@ -15,7 +15,7 @@ class InvoiceReport(models.Model):
     seller_account = fields.Char(string='Tài khoản Seller', required=True)
     seller_bank_code = fields.Char(string='Ngân hàng Seller', required=True)
     pos_local = fields.Char(string='Điểm bán')
-    wallet = fields.char(string='Ví điện tử', store=True, readonly=True)
+    wallet = fields.Char(string='Ví điện tử', store=True, readonly=True)
     account_id = fields.Many2one('t4tek.wallet.account', string='Chủ tài khoản', help="Chủ tài khoản giao dịch")
     acc_number = fields.Char(
                  string="Số tài khoản",
