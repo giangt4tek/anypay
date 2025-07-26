@@ -91,6 +91,35 @@ class _Get_WalletApiController(http.Controller):
                 "message": response.get('result', {}).get('message'),
                     }
         
+
+    def send_payment_request(self, Data, contact_wallet):
+        wallet_contact = request.env['wallet.contact'].sudo().search([
+            ('wallet_code', '=', contact_wallet)], limit=1)
+        
+        if not wallet_contact.api_url:
+            code = wallet_contact.get('wallet_code')
+            return {
+                "status": 'error',
+                "message": 'Không có URL API của Ví AnyPay [{code}] ',
+            }
+        
+        response, error = _send_request(
+            method='POST',
+            url=f'{wallet_contact.api_url}api/transaction/transfer/in',
+            json_data=Data,
+            headers={'Content-Type': 'application/json'},
+        )
+        if error: 
+            return {
+                "status": 'error',
+                "message": error,
+            }
+        else:    
+            return {
+                "status": response.get('result', {}).get('status'),
+                "message": response.get('result', {}).get('message'),
+                    }
+        
             
     @http.route('/api/token', type='http', auth='none', methods=['POST'], csrf=False)
     def get_api_key(self, **kwargs):
@@ -240,8 +269,7 @@ class _Get_WalletApiController(http.Controller):
                 'amount': data.get('amount'),
                 'description': data.get('description') or '',
                 'paymentUuid': data.get('paymentUuid'),
-                'acc_number': seller_info.get('sellerAccount'),  # dùng để kiểm tra access wallet
-                'sellerSame': seller_info.get('sellerName'),
+                'sellerName': seller_info.get('sellerName'),
                 'sellerAccount': seller_info.get('sellerAccount'),
                 'sellerBank': seller_info.get('sellerBankCode'),
             }
@@ -255,7 +283,14 @@ class _Get_WalletApiController(http.Controller):
                     'message': 'Hóa đơn không được ghi nhận.',
                     'fail': invCreate['message']
                 }
-
+            transfer_data = {
+                'acc_number': buyer_info.get('buyerAccount'),
+                'transferWallet': data.get('invoiceNumber'),
+                'transactionType': 'payment',
+                'monneyAmount': data.get('amount'),
+                'transfer_acc_number': seller_info.get('sellerAccount'),
+                'transferWallet': seller_info.get('sellerBankCode'),
+            }
             # === 3. Gọi xử lý thanh toán ===
             result = self._process_transaction(data)
             if result.get('status'):
@@ -347,13 +382,38 @@ class _Get_WalletApiController(http.Controller):
                         "message": f"Không có thông tin Ví AnyPay cần chuyển"
                     }
 
-                payload, error = self._add_tranfer_data(data, acc['walletAccount'], transfer_wallet, 'payment')
+                
+                payload = {}
+                error =None
+                required_fields = ['transactionType', 'monneyAmount',
+                                   'acc_number', 'transferAccNumber',
+                                   'wallet', 'transferWallet']
+        
+                for name in required_fields:
+                    if not data.get(name):
+                        error = 'Trường [{name}] không có dữ liệu'
+                        return {}, error
+                    payload[name] = data[name]
+        
+                # Chỉ thêm UUID nếu không có lỗi
+            
+                transactionUuid = str(uuid.uuid4())
+                payload['transactionType'] = 'payment'
+                payload['transactionUuid'] = transactionUuid
+                payload['acc_number'] = payload['transferAccNumber']
+                payload['transferAccNumber'] = acc['walletAccount']
+                payload['bank'] = transfer_wallet
+                payload['transferBank'] = _WALLET
+        
+                if len(result) < 6:
+                    error = 'Không có đủ thông tin yêu cầu'
+
                 if error:
                     return {"status": False, "message": error}
                 
                 data['transactionUuid'] = payload['transactionUuid']
                 
-                result = self.send_transfer_request(payload, transfer_wallet)
+                result = self.send_payment_request(payload, transfer_wallet)
                 if result.get('status') == 'error':
                     return {"status": False, "message": result.get('message')}
         # ---------------              *********                  --------------------
