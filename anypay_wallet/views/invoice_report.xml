@@ -51,17 +51,7 @@
     </field>
 </record>
 
-<record id="action_send_debt" model="ir.actions.server">
-    <field name="name">Gửi công nợ</field>
-    <field name="model_id" ref="model_invoice_report"/>
-    <field name="binding_model_id" ref="model_invoice_report"/>
-    <field name="binding_type">action</field>
-    <field name="state">code</field>
-    <field name="code">
-        for record in records:
-            record.send_debt_notification()
-    </field>
-</record>
+
 
         <record id="action_invoice_report" model="ir.actions.act_window">
             <field name="name">Hóa đơn thanh toán</field>

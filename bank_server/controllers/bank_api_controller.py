@@ -380,7 +380,7 @@ class _Get_BankApiController(http.Controller):
 
         for name in required_fields:
             if not infor.get(name):
-                error = 'Trường [{name}] không có dữ liệu'
+                error = f'Trường [{name}] không có dữ liệu'
                 return {}, error
             result[name] = infor[name]
 
@@ -424,7 +424,7 @@ class _Get_BankApiController(http.Controller):
                 if not data.get(name):
                     return {
                          'status': False,
-                         'message': 'Trường [{name}] không có dữ liệu'  }
+                         'message': f'Trường [{name}] không có dữ liệu'  }
             _logger.info(f"Creating invoice with data: {data}")
             invoice = request.env['invoice.report'].sudo().create({
                 'invoice_number': data.get('invoiceNumber'),

@@ -71,7 +71,7 @@
     <field name="state">code</field>
     <field name="code">
         for record in records:
-            record.send_debt_notification()
+            record.send_debt_paid()
     </field>
 </record>
 
