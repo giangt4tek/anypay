@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <record id="view_form_api_key" model="ir.ui.view">
+    <field name="name">api.key.form</field>
+    <field name="model">api.key</field>
+    <field name="arch" type="xml">
+      <form string="API Key">
+        <sheet>
+          <group>
+            <field name="name" readonly="1"/>
+            <!-- <field name="client_name"/> -->
+            <field name="user_id"/>
+            <field name="scope"/>
+            <field name="allowed_ips"/>
+            <field name="expired_at"/>
+            <field name="active"/>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <record id="view_list_api_key" model="ir.ui.view">
+    <field name="name">api.key.list</field>
+    <field name="model">api.key</field>
+    <field name="arch" type="xml">
+      <list>
+        <field name="name"/>
+        <!-- <field name="client_name"/> -->
+        <field name="user_id"/>
+        <field name="scope"/>
+        <field name="expired_at"/>
+        <field name="active"/>
+      </list>
+    </field>
+  </record>
+
+  <record id="action_api_key" model="ir.actions.act_window">
+    <field name="name">API Keys</field>
+    <field name="res_model">api.key</field>
+    <field name="view_mode">list,form</field>
+  </record>
+</odoo>

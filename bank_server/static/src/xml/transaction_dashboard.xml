@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+
+  <!-- Entry point gọi component OWL -->
+  <t t-name="bank_server.transaction_dashboard" owl="1">
+    <TransactionDashboard />
+  </t>
+
+  <!-- Đây mới là component chính -->
+  <t t-name="TransactionDashboard" owl="1">
+    <div class="vh-100 overflow-auto bg-muted">
+      <div class="container-fluid shadow-sm border bg-white px-3">
+
+        <!-- Các nút -->
+        <div class="row my-3">
+          <div class="btn-group w-100">
+            <button class="btn btn-primary w-20" t-on-click="openDepositDialog">Nạp tiền</button>
+            <button class="btn btn-primary w-20" t-on-click="openWithdrawalDialog">Rút tiền</button>
+            <button class="btn btn-primary w-20" t-on-click="openTransferOutDialog">Chuyển tiền</button>
+          </div>
+        </div>
+
+        <!-- Số dư -->
+        <div class="row mb-3">
+          <div class="col-12">
+            <div class="d-flex flex-column align-items-start">
+              <h3 class="text-muted fs-6">SỐ DƯ HIỆN TẠI:</h3>
+              <h2 class="text-primary fw-bold" t-out="state.balance_total"></h2>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bộ lọc -->
+        <div class="row mb-3">
+          <div class="col">
+            <div class="btn-group w-60" role="group" aria-label="Dashboard Actions">
+              <button class="btn btn-outline-primary" t-on-click="() => setFilter('week')">Tuần</button>
+              <button class="btn btn-outline-primary" t-on-click="() => setFilter('month')">Tháng</button>
+              <button class="btn btn-outline-primary" t-on-click="() => setFilter('year')">Năm</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tabs -->
+        <div class="o_notebook d-flex w-100 horizontal flex-column">
+          <div class="o_notebook_headers">
+            <ul class="nav nav-tabs flex-row flex-nowrap">
+              <li t-foreach="tabList" t-as="tab" t-key="tab.type"
+                  class="nav-item flex-nowrap cursor-pointer">
+                <a class="nav-link"
+                   t-att-class="{active: state.transactionTab === tab.type}"
+                   t-on-click="() => switchTab(tab.type)">
+                   <t t-esc="tab.label"/>
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <div class="o_notebook_content tab-content p-2">
+            <View t-if="viewPropsTreeViewReport" t-props="viewPropsTreeViewReport"/>
+          </div>
+        </div>
+      </div>
+    </div>
+  </t>
+</templates>

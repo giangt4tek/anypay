@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- LƯU Ý: Tạo Group mới không được trùng lặp id và ghi đè lên gourp cũ 
+     ID group quyền (parent) phải khác nhau khi thêm mới -->
+    <record id="cate_groups_wallet" model="ir.module.category">
+        <field name="name">Wallet Report System</field>
+        <field name="sequence">500</field>
+    </record>
+    <record id="user_wallet" model="res.groups">
+        <field name="name">Wallet</field>
+        <field name="category_id"
+            ref="anypay_wallet.cate_groups_wallet" />
+    </record>
+    <record id="manager_wallet" model="res.groups">
+        <field name="name">Wallet Manager</field>
+        <field name="category_id"
+            ref="anypay_wallet.cate_groups_wallet" />
+    </record>
+    
+</odoo>

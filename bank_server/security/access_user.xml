@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <!-- LƯU Ý: Tạo Group mới không được trùng lặp id và ghi đè lên gourp cũ 
+     ID group quyền (parent) phải khác nhau khi thêm mới -->
+    <record id="cate_groups_bank" model="ir.module.category">
+        <field name="name">Bank Report System</field>
+        <field name="sequence">500</field>
+    </record>
+    <record id="user_bank" model="res.groups">
+        <field name="name">Bank</field>
+        <field name="category_id"
+            ref="bank_server.cate_groups_bank" />
+    </record>
+    <record id="manager_bank" model="res.groups">
+        <field name="name">Bank Manager</field>
+        <field name="category_id"
+            ref="bank_server.cate_groups_bank" />
+    </record>
+    
+</odoo>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- FORM VIEW -->
+  <record id="view_t4tek_wallet_account_form_api" model="ir.ui.view">
+    <field name="name">t4tek.wallet.account.form</field>
+    <field name="model">t4tek.wallet.account</field>
+    <field name="arch" type="xml">
+      <form string="Thông tin Tài khoản Ví AnyPay">
+        <sheet>
+          <header>
+              <button name="set_is_active_account" string="Active" class="oe_highlight" type="object"/>
+          </header>
+
+          <group>
+             <field name="is_active"/>
+             <field name="partner_id"/>
+             <field name="cccd_display" readonly="1"/>
+             <field name="vat_num_display" readonly="1"/>
+             <field name="balance_account"/>
+          </group>
+          <group>
+            <field name="acc_number" readonly="1"/>
+             <field name="client_key" readonly="1"/>
+              <div class="mt-2">
+                <button name="generate_acc_number"
+                        type="object"
+                        string="Tạo Số Tài Khoản"
+                        class="btn btn-primary"/>
+              </div>
+          </group>
+        </sheet>
+      </form>
+    </field>
+  </record>
+
+  <!-- LIST VIEW -->
+  <record id="view_t4tek_wallet_account_list_api" model="ir.ui.view">
+    <field name="name">t4tek.wallet.account.list</field>
+    <field name="model">t4tek.wallet.account</field>
+    <field name="arch" type="xml">
+      <list string="Tài khoản Ví AnyPay">
+          <field name="partner_id"/>
+          <field name="cccd_display"/>
+          <field name="vat_num_display"/>
+          <field name="acc_number"/> 
+          <field name="balance_account"/>
+          <field name="is_active"/>
+        <!-- <field name="scope"/>
+        <field name="active_api"/> -->
+      </list>
+    </field>
+  </record>
+
+  <!-- ACTION -->
+  <record id="action_t4tek_wallet_account" model="ir.actions.act_window">
+    <field name="name">Tài khoản Ví AnyPay (API)</field>
+    <field name="res_model">t4tek.wallet.account</field>
+    <field name="view_mode">list,form</field>
+    <field name="view_id" ref="view_t4tek_wallet_account_list_api"/>
+  </record>
+
+  
+</odoo>

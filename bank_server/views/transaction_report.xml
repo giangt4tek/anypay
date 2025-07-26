@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+     <!-- list View -->
+        <record id="list_view_transaction_report" model="ir.ui.view">
+            <field name="name">transaction.report.list</field>
+            <field name="model">transaction.report</field>
+            <field name="arch" type="xml">
+                <list string="Lịch sử giao dịch" default_order="transaction_date desc">
+                    <field name="transaction_date"/>
+                    <field name="transaction_code"/>
+                    <field name="transaction_type"/>
+                    <field name="bank"/>
+                    <field name="transfer_acc_number"/>
+                    <field name="transfer_bank"/>
+                    <field name="signed_monney" sum="Total"/>
+                    <field name="note"/>
+                </list>
+            </field>
+        </record>
+        
+        <!-- Search View -->
+        <record id="search_view_transaction_report" model="ir.ui.view">
+            <field name="name">transaction.report.search</field>
+            <field name="model">transaction.report</field>
+            <field name="arch" type="xml">
+                <search>
+                    <group expand="0" string="Nhóm Theo" name="groupby">
+                        <filter string="Loại GD" name="groupby_transaction_type" domain="[]"
+                            context="{'group_by': 'transaction_type'}" />
+                        <filter string="Thời Gian" name="by_date" domain="[]"
+                            context="{'group_by': 'transaction_date'}" />
+                    </group>
+                </search>
+            </field>
+        </record>
+<!-- 
+        <record id="action_transaction_report_all" model="ir.ui.view">
+            <field name="name">transaction.all.report.list</field>
+            <field name="model">transaction.report</field>
+            <field name="arch" type="xml">
+                <list string="Lịch sử giao dịch" default_order="transaction_date desc">
+                    <field name="transaction_date"/>
+                    <field name="transaction_code"/>
+                    <field name="transaction_type"/>
+                    <field name="bank"/>
+                    <field name="transfer_acc_number"/>
+                    <field name="transfer_bank"/>
+                    <field name="signed_monney" sum="Total"/>
+                    <field name="note"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="action_transaction_report_deposit" model="ir.ui.view">
+            <field name="name">transaction.deposit.report.list</field>
+            <field name="model">transaction.report</field>
+            <field name="arch" type="xml">
+            <list string="Lịch sử giao dịch" default_order="transaction_date desc">
+                <field name="transaction_date"/>
+                <field name="transaction_code"/>
+                <field name="transaction_type"/>
+                <field name="bank"/>
+                <field name="transfer_acc_number"/>
+                <field name="transfer_bank"/>
+                <field name="signed_monney" sum="Total"/>
+                <field name="note"/>
+            </list>
+            </field>
+        </record>
+       
+        <record id="action_transaction_report_withdrawal" model="ir.ui.view">
+            <field name="name">transaction.withdrawal.report.list</field>
+            <field name="model">transaction.report</field>
+            <field name="arch" type="xml">
+                <list string="Lịch sử giao dịch" default_order="transaction_date desc">
+                    <field name="transaction_date"/>
+                    <field name="transaction_code"/>
+                    <field name="transaction_type"/>
+                    <field name="bank"/>
+                    <field name="transfer_acc_number"/>
+                    <field name="transfer_bank"/>
+                    <field name="signed_monney" sum="Total"/>
+                    <field name="note"/>
+                </list>
+            </field>
+        </record>
+       
+      
+        <record id="action_transaction_report_transfer_out" model="ir.ui.view">
+            <field name="name">transaction.transfer.out.report.list</field>
+            <field name="model">transaction.report</field>
+            <field name="arch" type="xml">
+                <list string="Lịch sử giao dịch" default_order="transaction_date desc">
+                    <field name="transaction_date"/>
+                    <field name="transaction_code"/>
+                    <field name="transaction_type"/>
+                    <field name="bank"/>
+                    <field name="transfer_acc_number"/>
+                    <field name="transfer_bank"/>
+                    <field name="signed_monney" sum="Total"/>
+                    <field name="note"/>
+                </list>
+            </field>
+        </record>
+       
+       <record id="action_transaction_report_transfer_in" model="ir.ui.view">
+            <field name="name">transaction.transfer.in.report.list</field>
+            <field name="model">transaction.report</field>
+            <field name="arch" type="xml">
+                <list string="Lịch sử giao dịch" default_order="transaction_date desc">
+                    <field name="transaction_date"/>
+                    <field name="transaction_code"/>
+                    <field name="transaction_type"/>
+                    <field name="bank"/>
+                    <field name="transfer_acc_number"/>
+                    <field name="transfer_bank"/>
+                    <field name="signed_monney" sum="Total"/>
+                    <field name="note"/>
+                </list>
+            </field>
+        </record> -->
+        
+<!-- 
+<record id="action_transaction_report_deposit" model="ir.actions.act_window">
+    <field name="name">Giao dịch nạp tiền</field>
+    <field name="res_model">transaction.report</field>
+    <field name="view_mode">tree,form</field>
+    <field name="domain">[('transaction_type','=','deposit')]</field>
+    <field name="view_id" ref="view_transaction_report_deposit_tree"/>
+</record> -->
+    </data>
+</odoo>

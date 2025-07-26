@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <data>
+        <record id="form_view_res_partner" model="ir.ui.view">
+            <field name="name">res.partner.form</field>
+            <field name="model">res.partner</field>
+            <field name="arch" type="xml">
+                <form string="Partners" create="0" js_class="form_controller_hine_navbar_inherit">
+                    <sheet>
+                        <div class="d-flex align-items-center mb24">
+                            <div class="flex-grow-1 text-center">
+                                <h2>HỆ THỐNG GIAO DỊCH</h2>
+                                <h2>Xin chào, </h2>
+                                <h1>
+                                    <field options="{'line_breaks': False}"
+                                        readonly="1"
+                                        class="text-primary fw-bold"
+                                        name="name" default_focus="1"
+                                        placeholder="e.g. Brandom Freeman"
+                                    />
+                                </h1>
+                            </div>
+                            <field name="image_1920" widget="image" class="oe_avatar"
+                                options="{'zoom': true, 'size':[150,150]}" />
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+
+        <record id="form_view_res_partner_manager" model="ir.ui.view">
+            <field name="name">res.partner.form.manager</field>
+            <field name="model">res.partner</field>
+            <field name="priority">0</field>
+            <field name="arch" type="xml">
+                <form string="Partners" create="0">
+                    <sheet>
+                        <div class="d-flex align-items-center mb24">
+                            <div class="flex-grow-1 text-center">
+                                <h2>THÔNG TIN KHÁCH HÀNG</h2>
+                                <h1>
+                                    <field options="{'line_breaks': False}"
+                                        readonly="1"
+                                        class="text-primary fw-bold"
+                                        name="name" default_focus="1"
+                                        placeholder="e.g. Brandom Freeman"
+                                    />
+                                </h1>
+                            </div>
+                            <field name="image_1920" widget="image" class="oe_avatar"
+                                options="{'zoom': true, 'size':[150,150]}" />
+                        </div>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_dashboard_manager" model="ir.actions.server">
+            <field name="name">Dashboard Manager</field>
+            <field name="model_id" ref="model_res_partner" />
+            <field name="state">code</field>
+            <field name="code">action = model._action_dashboard_manager()</field>
+        </record>
+
+        <record id="action_transaction_dashboard" model="ir.actions.client">
+            <field name="name">Transaction Dashboard</field>
+            <field name="tag">bank_server.transaction_dashboard</field>
+        </record>
+
+        <record id="action_dashboard_manager2" model="ir.actions.act_window">
+            <field name="name">Vehicle</field>
+            <field name="domain">[]</field>
+            <field name="res_model">transaction.report</field>
+            <field name="view_mode">list,form</field>
+            <field name="target">current</field>
+        </record>
+      
+
+    </data>
+</odoo>

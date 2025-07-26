@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+         <record id="action_dashboard_menu" model="ir.actions.server">
+            <field name="name">Dashboard Selector</field>
+            <field name="model_id" ref="model_res_partner" />
+            <field name="state">code</field>
+            <field name="code">action = model._action_dashboard()</field>
+        </record>
+
+        <!-- MENU ROOT -->
+        <menuitem id="menu_t4tek_bank_root"
+                  groups="manager_bank,user_bank"
+                  name="T4Tek Bank" 
+                  action="action_dashboard_menu"/>
+   
+        <!-- MENU ITEM -->
+        <menuitem id="menu_t4tek_bank_accounts"
+                  name="Tài khoản ngân hàng"
+                  parent="menu_t4tek_bank_root"
+                  action="action_t4tek_bank_account"
+                  groups="manager_bank"/>
+
+        <!-- <menuitem id="menu_contact_bank_root" name="Bank" sequence="10" groups="manager_bank"/> -->
+
+        <menuitem id="menu_bank_res_partner"
+                  name="Đối tác bank"
+                  parent="menu_t4tek_bank_root"
+                  action="base.action_partner_form"
+                  groups="manager_bank"
+                  sequence="10"/>
+
+        <menuitem id="menu_bank_contact" 
+                  name="Danh sách ngân hàng" 
+                  parent="menu_t4tek_bank_root" 
+                  action="action_bank_contact"
+                  groups="manager_bank"
+                  sequence="20"/>  
+
+       
+       
+        <menuitem id="menu_invoice_report_root"
+                  parent="menu_t4tek_bank_root" 
+                  name="Quản lý hóa đơn" 
+                  sequence="10"
+                  groups="user_bank"/>
+
+        <menuitem id="menu_invoice_report_main" name="Hóa đơn thanh toán" 
+                  parent="menu_invoice_report_root" 
+                  action="action_invoice_report" 
+                  sequence="1" />
+        
+        
+        <!-- <menuitem id="menu_transaction_report"
+                    name="Báo cáo giao dịch"
+                    parent="menu_t4tek_bank_root"
+                    action="action_transaction_report_group"
+                    sequence="30"
+                    groups="user_bank"/> -->
+
+        <!-- <menuitem id="menu_bank_dashboard" 
+                  name="Dashboard" 
+                  parent="menu_t4tek_bank_root"
+                  sequence="10"
+                  groups="user_bank"/>
+
+        <menuitem id="menu_transaction_dashboard" 
+                  name="Quản lý giao dịch"
+                  sequence="11"
+                  parent="menu_bank_dashboard" 
+                  action="action_transaction_dashboard_view" /> -->
+    </data>
+</odoo>

@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+         <record id="action_dashboard_menu" model="ir.actions.server">
+            <field name="name">Dashboard Selector</field>
+            <field name="model_id" ref="model_res_partner" />
+            <field name="state">code</field>
+            <field name="code">action = model._action_dashboard()</field>
+        </record>
+
+        <!-- MENU ROOT -->
+        <menuitem id="menu_t4tek_wallet_root"
+                  groups="manager_wallet,user_wallet"
+                  name="T4Tek Wallet" 
+                  action="action_dashboard_menu"/>
+   
+        <!-- MENU ITEM -->
+        <menuitem id="menu_t4tek_wallet_accounts"
+                  name="Tài khoản Ví AnyPay"
+                  parent="menu_t4tek_wallet_root"
+                  action="action_t4tek_wallet_account"
+                  groups="manager_wallet"/>
+
+        <!-- <menuitem id="menu_contact_wallet_root" name="wallet" sequence="10" groups="manager_wallet"/> -->
+
+        <menuitem id="menu_wallet_res_partner"
+                  name="Đối tác Wallet"
+                  parent="menu_t4tek_wallet_root"
+                  action="base.action_partner_form"
+                  groups="manager_wallet"
+                  sequence="10"/>
+
+        <menuitem id="menu_wallet_contact" 
+                  name="Danh sách Ví AnyPay" 
+                  parent="menu_t4tek_wallet_root" 
+                  action="action_wallet_contact"
+                  groups="manager_wallet"
+                  sequence="20"/>  
+
+       
+       
+        <menuitem id="menu_invoice_report_root"
+                  parent="menu_t4tek_wallet_root" 
+                  name="Quản lý hóa đơn" 
+                  sequence="10"
+                  groups="user_wallet"/>
+
+        <menuitem id="menu_invoice_report_main" name="Hóa đơn thanh toán" 
+                  parent="menu_invoice_report_root" 
+                  action="action_invoice_report" 
+                  sequence="1" />
+        
+        
+        <!-- <menuitem id="menu_transaction_report"
+                    name="Báo cáo giao dịch"
+                    parent="menu_t4tek_wallet_root"
+                    action="action_transaction_report_group"
+                    sequence="30"
+                    groups="user_wallet"/> -->
+
+        <!-- <menuitem id="menu_wallet_dashboard" 
+                  name="Dashboard" 
+                  parent="menu_t4tek_wallet_root"
+                  sequence="10"
+                  groups="user_wallet"/>
+
+        <menuitem id="menu_transaction_dashboard" 
+                  name="Quản lý giao dịch"
+                  sequence="11"
+                  parent="menu_wallet_dashboard" 
+                  action="action_transaction_dashboard_view" /> -->
+    </data>
+</odoo>

@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="bank_server.action_transaction" owl="1">
+        <div class="o_form_view o_view_controller o_action"> 
+            <div class="o_form_view_container">
+                <div class="o_content">
+                    <div class="o_form_renderer o_form_editable o_form_saved">
+                        <div class="o_form_sheet_bg">
+                            <div class="o_form_sheet position-relative">
+                                    <h3 class="mb-2">SỐ DƯ HIỆN TẠI: <span class="text-primary fw-bold"><t t-esc="state.balance_total"/></span></h3>
+                                    <!-- <h3 class="mb-2">Điểm khách hàng thân thiết đang có: <span class="fw-bold btn btn-outline-primary"><t t-esc="state.reward_point_amount_exchange"/></span></h3> 
+                                    <h3 class="mb-2">Điểm quy đổi: <span class="text-primary fw-bold">1-><t t-esc="state.reward_point_amount"/></span></h3> <br/> -->
+                                 <br/>
+                                 <form 
+                                    class="oe_title mb24"
+                                    t-on-submit.prevent="onSubmit">
+                                    <div class="o_inner_group grid">
+                                        <div class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0">
+                                            <t t-if="state.transactionType === 'transfer_out'">
+                                              
+                                                <div class="o_cell o_wrap_label flex-grow-1 flex-sm-grow-0 w-100 text-break text-900">
+                                                       <label class="o_form_label" for="transferBank">Tên ngân hàng</label>
+                                                </div>
+                                                <div class="o_cell o_wrap_input flex-grow-1 flex-sm-grow-0 text-break" style="width: 100%;">
+                                                       <div class="o_field_widget o_required_modifier o_field_char">
+                                                          <select 
+                                                            class="o_input" 
+                                                            id="transferBank" 
+                                                            name="transferBank"
+                                                            required="required"
+                                                            t-on-change="onBankChange">
+                                                            <option value="" disabled="disabled" selected="selected">Chọn ngân hàng</option>
+                                                            <t t-foreach="state.bankList" t-as="bank" t-key="bank.id">
+                                                              <option 
+                                                                t-att-value="bank.bank_code"
+                                                                t-att-selected="state.transferBank === bank.bank_code">
+                                                                <t t-esc="`${bank.bank_code}`"/>
+                                                              </option>
+                                                            </t>
+                                                          </select>
+                                                       </div>
+                                                </div>
+
+                                                <div class="o_cell o_wrap_label flex-grow-1 flex-sm-grow-0 w-100 text-break text-900">
+                                                       <label class="o_form_label" for="accountNumber">Số tài khoản</label>
+                                                   </div>
+                                                   <div class="o_cell o_wrap_input flex-grow-1 flex-sm-grow-0 text-break" style="width: 100%;">
+                                                       <div class="o_field_widget o_required_modifier o_field_char">
+                                                           <input 
+                                                               class="o_input" 
+                                                               id="accountNumber" 
+                                                               name="accountNumber"
+                                                               type="text" 
+                                                               placeholder="Nhập số tài khoản"
+                                                               autocomplete="off"
+                                                               required="required"
+                                                           />
+                                                       </div>
+                                                </div>
+                                                  
+                                            </t>
+                                            <div class="o_cell o_wrap_label flex-grow-1 flex-sm-grow-0 w-100 text-break text-900">
+                                            <h3 
+                                                class="o_form_label" 
+                                                for="monneyAmount">
+                                                <t t-if="state.transactionType === 'deposit'">Nạp Tiền</t>
+                                                <t t-elif="state.transactionType === 'withdrawal'">Rút Tiền</t>
+                                                <t t-elif="state.transactionType === 'transfer_out'">Chuyển Tiền</t>
+                                            </h3>
+                                            </div>
+                                            <div class="o_cell o_wrap_input flex-grow-1 flex-sm-grow-0 text-break" style="width: 100%;">
+                                                <div class="o_field_widget o_required_modifier o_field_char">
+                                                   <h3>
+                                                   <input 
+                                                         class="o_input" 
+                                                         id="monneyAmount" 
+                                                         name="monneyAmount"
+                                                         type="text" 
+                                                         min="0" 
+                                                         step="1000" 
+                                                         t-att-max="state.balance"
+                                                         placeholder="0 VNĐ"
+                                                         autocomplete="off" />
+                                                   </h3>
+                                                  
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <br/>
+                                        <div class="mt-2" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px;">
+                                                <t t-foreach="state.packets" t-as="packet" t-key="packet">
+                                                    <button
+                                                        type="button"
+                                                        class="btn"
+                                                        t-att-class="{
+                                                            'btn-outline-secondary': state.amount !== packet,
+                                                            'btn-primary': state.amount === packet
+                                                        }"
+                                                        t-on-click="() => selectAmount(packet)">
+                                                        <t t-esc="packet.toLocaleString()"/> VNĐ
+                                                    </button>
+                                                </t>
+                                        </div>
+
+
+                                        <!-- Password Field -->
+                                        <div class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0">
+                                          
+                                            <div class="o_cell o_wrap_input flex-grow-1 flex-sm-grow-0 text-break" style="width: 100%;">
+                                                <div class="o_field_widget o_required_modifier o_field_char">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <!-- Submit Button -->
+                                          <div class="o_wrap_field d-flex d-sm-contents flex-column mb-3 mb-sm-0">
+                                            <div class="o_cell o_wrap_input flex-grow-1 flex-sm-grow-0 text-break text-center mt-3">
+                                            <div class="d-flex">
+                                             <input 
+                                                        class="mr-3" 
+                                                        type="checkbox" 
+                                                        id="confirmTransaction"
+                                                        name="confirmTransaction"
+                                                        required="required"
+                                                    />
+                                                    <label for="confirmTransaction" class="text-danger">
+                                                    CẢNH BÁO: Thao tác này KHÔNG THỂ HOÀN TÁC!
+                                                    Bạn có chắc chắn thực hiện giao dịch
+                                                    </label>
+                                            </div>
+                                                
+                                                <button 
+                                                    type="submit"
+                                                    class="btn btn-primary"
+                                                    disabled="disabled">
+                                                    Xác Nhận
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
