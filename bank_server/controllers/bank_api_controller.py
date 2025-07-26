@@ -204,7 +204,7 @@ class _Get_BankApiController(http.Controller):
         acc_number = data.get('acc_number')
         auth_token = request.env['api.key'].sudo().search([ ('t4tek_acc.acc_number', '=', acc_number),], limit=1)
         
-        if (not auth_token and auth_token.name == token) or auth_token.expired_at < fields.Datetime.now():
+        if (not auth_token and auth_token.name == token):
             return {
                     'status': 'error',
                     'message': 'Token không phù hợp với tài khoản này Hoặc chưa được cấp Hoặc đã hết hạn'}
