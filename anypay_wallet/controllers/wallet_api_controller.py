@@ -96,35 +96,6 @@ class _Get_WalletApiController(http.Controller):
                 "message": response.get('result', {}).get('message'),
                     }
         
-
-    def send_payment_transfer(self, Data, contact_wallet):
-        wallet_contact = request.env['wallet.contact'].sudo().search([
-            ('wallet_code', '=', contact_wallet)], limit=1)
-        
-        if not wallet_contact.api_url:
-            code = wallet_contact.get('wallet_code')
-            return {
-                "status": 'error',
-                "message": 'Không có URL API của Ví AnyPay [{code}] ',
-            }
-        
-        response, error = _send_request(
-            method='POST',
-            url=f'{wallet_contact.api_url}api/transaction/transfer/in',
-            json_data=Data,
-            headers={'Content-Type': 'application/json'},
-        )
-        if error: 
-            return {
-                "status": 'error',
-                "message": error,
-            }
-        else:    
-            return {
-                "status": response.get('result', {}).get('status'),
-                "message": response.get('result', {}).get('message'),
-                    }
-        
             
     @http.route('/api/token', type='http', auth='none', methods=['POST'], csrf=False)
     def get_api_key(self, **kwargs):

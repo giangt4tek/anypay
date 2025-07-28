@@ -110,10 +110,14 @@ class InvoiceReport(models.Model):
                     "message": error,
                 })
             else:
+                status = response.get('result', {}).get('status')
+                message = response.get('result', {}).get('message')
                 results.append({
-                    "status": response.get('result', {}).get('status'),
-                    "message": response.get('result', {}).get('message'),
+                    "status": status,
+                    "message": message,
                 })
+                if status == 'Success':
+                    rec.set_done()
 
         return results
     
@@ -144,10 +148,10 @@ class InvoiceReport(models.Model):
     
     def _add_seller_information(self):
         self.ensure_one()
-        buyer_data = {
+        seller_data = {
             'sellerName': self.partner_id,
             'sellerAccount': self.acc_number,
             'sellerBank': self.bank
            
         }
-        return buyer_data
+        return seller_data
