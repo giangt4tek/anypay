@@ -189,7 +189,7 @@ class _Get_BankApiController(http.Controller):
             return {
                 'status': 'error',
                 'message': 'Chuyển khoản không thành công.',
-                'Fail': result.message
+                'Fail': result.get('message')
             }
             
     @http.route('/api/invoice/create', type='json', auth='none', methods=["POST"], csrf=False)
