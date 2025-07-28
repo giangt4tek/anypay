@@ -114,9 +114,9 @@ class T4tekWalletAccount(models.Model):
                 [('account_id', '=', record.id)])
             balance_account = 0
             for transaction in Transaction_reports:
-                if transaction.transaction_type == 'deposit' or transaction.transaction_type == 'transfer_in':
+                if transaction.transaction_type in ['deposit' ,'transfer_in']:
                     balance_account += transaction.monney
-                elif transaction.transaction_type == 'withdrawal' or transaction.transaction_type == 'transfer_out':
+                elif transaction.transaction_type in ['withdrawal', 'transfer_out', 'payment']:
                     balance_account -= transaction.monney
                 else: return
 

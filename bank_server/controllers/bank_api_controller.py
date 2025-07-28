@@ -399,7 +399,7 @@ class _Get_BankApiController(http.Controller):
                     return {
                          'status': False,
                          'message': f'Trường [{name}] không có dữ liệu'  }
-            _logger.info(f"Creating invoice with data: {data}")
+            
             invoice = request.env['invoice.report'].sudo().create({
                 'invoice_number': data.get('invoiceNumber'),
                 'invoice_date': data.get('invoiceDate'),
@@ -413,7 +413,7 @@ class _Get_BankApiController(http.Controller):
                 'account_id': acc['bankAccount'].id,
                 'bank': _BANK
             })
-            _logger.info(f"Created invoice: {invoice}")
+            
             return {
                     'status': True,
                     'message': 'Hóa đơn đã được ghi nhận.'

@@ -41,7 +41,7 @@ class InvoiceReport(models.Model):
     state = fields.Selection([
         ('draft', 'Khởi tạo'),
         ('done', 'Hoàn tất'),
-        ('error', 'Lỗi')
+        ('cancel', 'Hủy')
     ], default='draft', string='Trạng thái')
 
     note = fields.Text(string='Ghi chú nội bộ')
@@ -69,7 +69,7 @@ class InvoiceReport(models.Model):
 
     def set_cancel(self):
         for record in self:
-            record.state = 'error'  # hoặc 'cancel' nếu bạn định nghĩa thêm trạng thái
+            record.state = 'cancel'  # hoặc 'cancel' nếu bạn định nghĩa thêm trạng thái
 
 
     

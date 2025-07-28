@@ -54,7 +54,7 @@ class TransactionReport(models.Model):
 
     def _compute_signed_monney(self):
         for rec in self:
-            if rec.transaction_type in ['withdrawal', 'transfer_out']:  # hoặc giá trị tương ứng
+            if rec.transaction_type in ['withdrawal', 'transfer_out', 'payment']:  # hoặc giá trị tương ứng
                 rec.signed_monney = -rec.monney
             else:
                 rec.signed_monney = rec.monney
