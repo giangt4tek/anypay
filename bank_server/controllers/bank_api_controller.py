@@ -275,7 +275,7 @@ class _Get_BankApiController(http.Controller):
             ('acc_number', '=', accNumber)], limit=1)
         error = None
         if Bank != _BANK: error = 'Ngân hàng nhận không phù hợp'
-        if not bankAccount:  error = 'Tài khoản này không tồn tại trong ngân hàng {_BANK}'
+        if not bankAccount:  error = f'Tài khoản này không tồn tại trong ngân hàng {_BANK}'
         if bankAccount and Bank == _BANK:
             return {
                 "status": True,
