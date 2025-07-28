@@ -429,7 +429,7 @@ class _Get_WalletApiController(http.Controller):
                 payload['acc_number'] = data['transferAccNumber']
                 payload['bank'] = data['transferBank']
                 payload['transferAccNumber'] = data['acc_number']
-                payload['transferWallet'] = _WALLET
+                payload['transferBank'] = _WALLET
                 _logger.info(f"------> Payload for payment transaction: {payload}")
                 if len(payload) < 6:
                     error = 'Không có đủ thông tin yêu cầu'
