@@ -137,7 +137,7 @@ class InvoiceReport(models.Model):
         buyer_data = {
             'buyerName': self.buyer_name,
             'buyerAccount': self.buyer_account,
-            'buyerBankCode': self.buyer_bank_code,
+            'buyerBank': self.buyer_bank_code,
            
         }
         return buyer_data
@@ -147,7 +147,7 @@ class InvoiceReport(models.Model):
         buyer_data = {
             'sellerName': self.partner_id,
             'sellerAccount': self.acc_number,
-            'sellerBankCode': self.bank
+            'sellerBank': self.bank
            
         }
         return buyer_data

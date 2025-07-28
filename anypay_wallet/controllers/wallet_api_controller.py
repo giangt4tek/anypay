@@ -62,21 +62,26 @@ def _send_request(method, url, json_data=None, form_data=None, params=None, head
 class _Get_WalletApiController(http.Controller):
     _name  = 'wallet.api.controller'
 
-    def send_transfer_request(self, Data, contact_wallet):
+    def send_transfer_request(self, Data, contact_):
+        _logger.info(f"Sending transfer request to contact: {contact_}")
+        infor_contact = request.env['wallet.contact'].sudo().search([
+            ('wallet_code', '=', contact_)], limit=1)
         
-        wallet_contact = request.env['wallet.contact'].sudo().search([
-            ('wallet_code', '=', contact_wallet)], limit=1)
-        
-        if not wallet_contact.api_url:
-            code = wallet_contact.get('wallet_code')
+        if not infor_contact:
             return {
                 "status": 'error',
-                "message": 'Không có URL API của Ví AnyPay [{code}] ',
+                "message": f'Không tìm thấy đối tác [{contact_}]',
             }
-        
+        if not infor_contact.api_url:
+            code = infor_contact.get('wallet_code')
+            return {
+                "status": 'error',
+                "message": f'Không có URL API của Ví AnyPay [{code}] ',
+            }
+        _logger.info(f"-------> API URL: {infor_contact.api_url}api/transaction/transfer/in")
         response, error = _send_request(
             method='POST',
-            url=f'{wallet_contact.api_url}api/transaction/transfer/in',
+            url=f'{infor_contact.api_url}api/transaction/transfer/in',
             json_data=Data,
             headers={'Content-Type': 'application/json'},
         )
@@ -92,7 +97,7 @@ class _Get_WalletApiController(http.Controller):
                     }
         
 
-    def send_payment_request(self, Data, contact_wallet):
+    def send_payment_transfer(self, Data, contact_wallet):
         wallet_contact = request.env['wallet.contact'].sudo().search([
             ('wallet_code', '=', contact_wallet)], limit=1)
         
@@ -254,6 +259,7 @@ class _Get_WalletApiController(http.Controller):
     @http.route('/api/invoice/payment', type='json', auth='none', methods=["POST"], csrf=False)
     def invoice_payment(self, **post):
         try:
+            _logger.info("-----------------> Received invoice payment request")
             raw_body = request.httprequest.get_data(as_text=True)
             data = json.loads(raw_body)
 
@@ -263,6 +269,7 @@ class _Get_WalletApiController(http.Controller):
 
             invoice_info = {
                 'acc_number': buyer_info.get('buyerAccount'),
+                'wallet': buyer_info.get('buyerBank'),
                 'invoiceNumber': data.get('invoiceNumber'),
                 'invoiceDate': data.get('invoiceDate'),
                 'POSLocal': data.get('posLocal') or '',
@@ -271,38 +278,57 @@ class _Get_WalletApiController(http.Controller):
                 'paymentUuid': data.get('paymentUuid'),
                 'sellerName': seller_info.get('sellerName'),
                 'sellerAccount': seller_info.get('sellerAccount'),
-                'sellerBank': seller_info.get('sellerBankCode'),
+                'sellerBank': seller_info.get('sellerBank'),
             }
 
-
+            _logger.info("-----------------> create invoice")
             # === 2. Ghi nhận hóa đơn ===
             invCreate = self.create_invoice(invoice_info)
-            if not invCreate['status']:
+            if not invCreate.get('is_ivoice'):
                 return {
                     'status': 'error',
                     'message': 'Hóa đơn không được ghi nhận.',
                     'fail': invCreate['message']
                 }
+            
+            _logger.info("-----------------> Invoice created successfully")
             transfer_data = {
                 'acc_number': buyer_info.get('buyerAccount'),
-                'transferWallet': data.get('invoiceNumber'),
+                'wallet': buyer_info.get('buyerBank'),
+                'transferAccNumber': seller_info.get('sellerAccount'),
+                'transferBank': seller_info.get('sellerBank'),
                 'transactionType': 'payment',
                 'monneyAmount': data.get('amount'),
-                'transfer_acc_number': seller_info.get('sellerAccount'),
-                'transferWallet': seller_info.get('sellerBankCode'),
+                
             }
+
+            if invCreate.get('invoice_state') == 'draft':  # Lấy trạng thái hóa đơn nếu cần
             # === 3. Gọi xử lý thanh toán ===
-            result = self._process_transaction(data)
-            if result.get('status'):
-                return {
-                    "status": 'Success',
-                    "message": 'Thanh toán thành công'
-                }
-            else:
+                _logger.info("-----------------> Processing transaction")
+                result = self._process_transaction(transfer_data)
+                if result.get('status'):
+                    # === 4. Cập nhật trạng thái hóa đơn ===
+                    invoice_record = request.env['invoice.report'].sudo().search([
+                        ('invoice_number', '=', invoice_info['invoiceNumber']),
+                        ('acc_number', '=', invoice_info['acc_number']),
+                        ('payment_uuid', '=', invoice_info['paymentUuid'])
+                    ], limit=1)
+                    invoice_record.set_done()  # Cập nhật trạng thái hóa đơn thành 'done'
+                    _logger.info(f"Invoice {invoice_record.invoice_number} marked as done.")
+                    return {
+                        "status": 'Success',
+                        "message": 'Thanh toán thành công'
+                    }
+                else:
+                    return {
+                        "status": "error",
+                        "message": f"Thanh toán thất bại",
+                        "fail": result.get('message')
+                    }
+            if invCreate.get('invoice_state') == 'done':
                 return {
                     "status": "error",
-                    "message": f"Thanh toán thất bại",
-                    "fail": result.get('message')
+                    "message": "Hóa đơn đã được thanh toán trước đó."
                 }
 
         except Exception as e:
@@ -319,7 +345,7 @@ class _Get_WalletApiController(http.Controller):
             ('acc_number', '=', accNumber)], limit=1)
         error = None
         if Wallet != _WALLET: error = 'Ví AnyPay nhận không phù hợp'
-        if not walletAccount:  error = 'Tài khoản này không tồn tại trong Ví AnyPay {_WALLET}'
+        if not walletAccount:  error = f'Tài khoản này không tồn tại trong Ví AnyPay {_WALLET}'
         if walletAccount and Wallet == _WALLET:
             return {
                 "status": True,
@@ -374,46 +400,46 @@ class _Get_WalletApiController(http.Controller):
                         "message": f"Vui lòng không nhập tài khoản của chính mình trong Ví AnyPay hiện tại"
                     }
 
-                if data['transferWallet']:
-                    transfer_wallet = data['transferWallet']
-                else:
-                    return {
-                        "status": False,
-                        "message": f"Không có thông tin Ví AnyPay cần chuyển"
-                    }
+                # if data['transferWallet']:
+                #     transfer_wallet = data['transferWallet']
+                # else:
+                #     return {
+                #         "status": False,
+                #         "message": f"Không có thông tin Ví AnyPay cần chuyển"
+                #     }
 
                 
                 payload = {}
-                error =None
-                required_fields = ['transactionType', 'monneyAmount',
+            
+                required_fields = ['monneyAmount',
                                    'acc_number', 'transferAccNumber',
-                                   'wallet', 'transferWallet']
+                                   'transferBank']
         
                 for name in required_fields:
                     if not data.get(name):
-                        error = 'Trường [{name}] không có dữ liệu'
-                        return {}, error
+                        error = f'Trường [{name}] không có dữ liệu'
+                        return {"status": False, "message": error}
                     payload[name] = data[name]
         
                 # Chỉ thêm UUID nếu không có lỗi
-            
+                _logger.info("------> Adding transfer data for payment transaction")
                 transactionUuid = str(uuid.uuid4())
-                payload['transactionType'] = 'payment'
+                payload['transactionType'] = data['transactionType']
                 payload['transactionUuid'] = transactionUuid
-                payload['acc_number'] = payload['transferAccNumber']
-                payload['transferAccNumber'] = acc['walletAccount']
-                payload['bank'] = transfer_wallet
-                payload['transferBank'] = _WALLET
-        
-                if len(result) < 6:
+                payload['acc_number'] = data['transferAccNumber']
+                payload['bank'] = data['transferBank']
+                payload['transferAccNumber'] = data['acc_number']
+                payload['transferWallet'] = _WALLET
+                _logger.info(f"------> Payload for payment transaction: {payload}")
+                if len(payload) < 6:
                     error = 'Không có đủ thông tin yêu cầu'
-
+                _logger.info("------> có lỗi từ lúc nào %s", error)
                 if error:
                     return {"status": False, "message": error}
                 
-                data['transactionUuid'] = payload['transactionUuid']
-                
-                result = self.send_payment_request(payload, transfer_wallet)
+                # data['transactionUuid'] = payload['transactionUuid']
+                _logger.info("------> Sending transfer request for payment transaction")
+                result = self.send_transfer_request(payload, data['transferBank'])
                 if result.get('status') == 'error':
                     return {"status": False, "message": result.get('message')}
         # ---------------              *********                  --------------------
@@ -449,7 +475,7 @@ class _Get_WalletApiController(http.Controller):
 
         for name in required_fields:
             if not infor.get(name):
-                error = 'Trường [{name}] không có dữ liệu'
+                error = f'Trường [{name}] không có dữ liệu'
                 return {}, error
             result[name] = infor[name]
 
@@ -470,10 +496,10 @@ class _Get_WalletApiController(http.Controller):
 
     def create_invoice(self, data):
         try:
-            acc = self.check_access_wallet(data['acc_number'], _WALLET)
             
+            acc = self.check_access_wallet(data['acc_number'], data['wallet'])
             if not acc['status']: return acc
-            
+           
             invocie_is = request.env['invoice.report'].sudo().search([
                 ('invoice_number', '=', data['invoiceNumber']),
                  ('acc_number', '=', data['acc_number']),
@@ -481,19 +507,21 @@ class _Get_WalletApiController(http.Controller):
             if invocie_is:
                 return {
                     'status': False,
+                    'is_ivoice': True,
+                    'invoice_state': invocie_is.state,
                     'message': 'Hóa đơn đã tồn tại.'
                 }
             
             required_fields = [
                 'invoiceNumber', 'invoiceDate',
-                'sellerSame', 'sellerAccount', 'sellerBank',
+                'sellerName', 'sellerAccount', 'sellerBank',
                 'amount', 'paymentUuid'
             ]
             for name in required_fields:
                 if not data.get(name):
                     return {
                          'status': False,
-                         'message': 'Trường [{name}] không có dữ liệu'  }
+                         'message': f'Trường [{name}] không có dữ liệu'  }
             _logger.info(f"Creating invoice with data: {data}")
             invoice = request.env['invoice.report'].sudo().create({
                 'invoice_number': data.get('invoiceNumber'),
@@ -511,11 +539,14 @@ class _Get_WalletApiController(http.Controller):
             _logger.info(f"Created invoice: {invoice}")
             return {
                     'status': True,
+                    'is_ivoice': True,
+                    'invoice_state': invocie_is.state,
                     'message': 'Hóa đơn đã được ghi nhận.'
                 }
         except Exception as e:
             return {
                 "status": False,
+                'is_ivoice': False,
                 "message": f"Lỗi hệ thống: {str(e)}"
             }
         

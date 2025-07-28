@@ -175,7 +175,7 @@ class _Get_BankApiController(http.Controller):
             if not data.get(name):
                 return {
                     'status': 'error',
-                    'message': 'Trường [{name}] không có dữ liệu'
+                    'message': f'Trường [{name}] không có dữ liệu'
                     }
                   
         result = self._process_transaction(data)
@@ -321,33 +321,7 @@ class _Get_BankApiController(http.Controller):
                 
                 data['transactionUuid'] = payload['transactionUuid']
         # ---------------              *********                  --------------------
-                
-        # ---------------   Xử lý khi giao dịch dạng Thanh toán hóa đơn --------------------
-            if data['transactionType'] == 'payment':
-                if data['transferAccNumber'] == data['acc_number'] and data['transferBank'] == _BANK:
-                    return {
-                        "status": False,
-                        "message": f"Vui lòng không nhập tài khoản của chính mình trong ngân hàng hiện tại"
-                    }
-
-                if data['transferBank']:
-                    transfer_bank = data['transferBank']
-                else:
-                    return {
-                        "status": False,
-                        "message": f"Không có thông tin ngân hàng cần chuyển"
-                    }
-
-                payload, error = self._add_tranfer_data(data, acc['bankAccount'], transfer_bank, 'payment')
-                if error:
-                    return {"status": False, "message": error}
-                
-                data['transactionUuid'] = payload['transactionUuid']
-                
-                result = self.send_transfer_request(payload, transfer_bank)
-                if result.get('status') == 'error':
-                    return {"status": False, "message": result.get('message')}
-        # ---------------              *********                  --------------------
+        
           
             if data['bank'] == _BANK:
              
