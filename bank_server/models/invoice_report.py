@@ -2,6 +2,7 @@ from odoo import models, fields, api
 import uuid
 import logging
 from odoo.http import request
+import json
 _logger = logging.getLogger(__name__)
 from ..controllers.bank_api_controller import _send_request
 
@@ -96,6 +97,16 @@ class InvoiceReport(models.Model):
                 continue
 
             Data = rec._add_general_invoice_information()
+            try:
+                json.dumps(Data)
+            except TypeError as e:
+                _logger.error("Payload JSON không hợp lệ: %s", e)
+                results.append({
+                    "invoice": rec.invoice_number,
+                    "status": 'error',
+                    "message": f"Dữ liệu JSON không hợp lệ: {e}"
+                })
+                continue
             response, error = _send_request(
                 method='POST',
                 url=f'{bank_contact.api_url}api/invoice/payment',
@@ -124,12 +135,12 @@ class InvoiceReport(models.Model):
     def _add_general_invoice_information(self):
         self.ensure_one()
         invoice_data = {
-            'invoiceNumber': self.invoice_number,
-            'invoiceDate': self.invoice_date.strftime('%Y-%m-%d %H:%M:%S'),
-            'POSLocal': self.pos_local or '',
-            'amount': self.amount,
-            'description': self.description or '',
-            'paymentUuid': self.payment_uuid,
+            'invoiceNumber': str(self.invoice_number or ''),
+            'invoiceDate': self.invoice_date.strftime('%Y-%m-%d %H:%M:%S') if self.invoice_date else '',
+            'POSLocal': str(self.pos_local or ''),
+            'amount': float(self.amount or 0.0),
+            'description': str(self.description or ''),
+            'paymentUuid': str(self.payment_uuid or ''),
             'buyer': self._add_buyer_information(),
             'seller': self._add_seller_information(),
             
@@ -139,19 +150,18 @@ class InvoiceReport(models.Model):
     def _add_buyer_information(self):
         self.ensure_one()
         buyer_data = {
-            'buyerName': self.buyer_name,
-            'buyerAccount': self.buyer_account,
-            'buyerBank': self.buyer_bank_code,
-           
+            'buyerName': str(self.buyer_name or ''),
+            'buyerAccount': str(self.buyer_account or ''),
+            'buyerBank': str(self.buyer_bank_code or ''),
         }
         return buyer_data
+
     
     def _add_seller_information(self):
         self.ensure_one()
         seller_data = {
-            'sellerName': self.partner_id,
-            'sellerAccount': self.acc_number,
-            'sellerBank': self.bank
-           
+            'sellerName': str(self.partner_id.name if self.partner_id else ''),
+            'sellerAccount': str(self.acc_number or ''),
+            'sellerBank': str(self.bank or ''),
         }
         return seller_data
