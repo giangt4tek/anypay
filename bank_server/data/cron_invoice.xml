@@ -12,4 +12,4 @@
             <field name="active" eval="True"/>
         </record>
       </data>
-</odoo>
+</odoo>payment_from_wallet
