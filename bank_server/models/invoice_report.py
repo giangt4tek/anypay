@@ -74,11 +74,16 @@ class InvoiceReport(models.Model):
             record.state = 'error'  # hoặc 'cancel' nếu bạn định nghĩa thêm trạng thái
 
 
-    def payment_from_wallet(self):
-        draft_invoice = self.search([('state', '=', 'draft')])
-        _logger.info('---------> hóa đơn chưa thanh toán %s', draft_invoice)
-        for rec in draft_invoice:
-            rec
+    def payment_invoice_draft(self):
+         results = []
+         draft_invoices = self.search([('state', '=', 'draft')])
+         _logger.info('---------> Hóa đơn chưa thanh toán: %s', draft_invoices.ids)
+     
+         for rec in draft_invoices:
+             result = rec.send_debt_paid()  # gọi hàm đã viết
+             results.extend(result)  # append kết quả của từng record
+     
+         return results
         
   
     def send_debt_paid(self):
@@ -86,13 +91,13 @@ class InvoiceReport(models.Model):
 
         for rec in self.sudo():
             bank_contact = request.env['bank.contact'].sudo().search([
-                ('bank_code', '=', self.buyer_bank_code)], limit=1)
+                ('bank_code', '=', rec.buyer_bank_code)], limit=1)
 
             if not bank_contact or not bank_contact.api_url:
                 results.append({
                     "invoice": rec.invoice_number,
                     "status": 'error',
-                    "message": f"Không có URL API của ngân hàng [{self.buyer_bank_code}]"
+                    "message": f"Không có URL API của ngân hàng [{rec.buyer_bank_code}]"
                 })
                 continue
 

@@ -5,7 +5,7 @@
             <field name="name">Invoice Report</field>
             <field name="model_id" ref="model_invoice_report"/>
             <field name="state">code</field>
-            <field name="code">model.payment_from_wallet()</field>
+            <field name="code">model.payment_invoice_draft()</field>
             <field name="interval_number">1</field>
             <field name="interval_type">minutes</field>
             <!-- Active flag is set on fetchmail_server.create/write -->
