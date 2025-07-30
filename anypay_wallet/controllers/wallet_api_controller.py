@@ -331,9 +331,16 @@ class _Get_WalletApiController(http.Controller):
             acc = self.check_access_wallet(data['acc_number'], data['wallet'])
             
             if not acc.get('status'): return acc
-           
+            
+            if data['transactionType'] in ['withdrawal', 'transfer_out', 'payment'] and getattr(acc['walletAccount'], 'balance_account', 0) < data['monneyAmount']:
+                return {
+                    "status": False,
+                    "message": f"Số dư không đủ để thực hiện giao dịch."
+                }
+
         # ---------------   Xử lý khi giao dịch dạng Chuyển khoản --------------------
             if data['transactionType'] == 'transfer_out':
+                
                 if data['transferAccNumber'] == data['acc_number'] and data['transferWallet'] == _WALLET:
                     return {
                         "status": False,
