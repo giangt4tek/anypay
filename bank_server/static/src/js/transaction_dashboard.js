@@ -189,7 +189,6 @@ export class TransactionDashboard extends Component {
   }
 
   getDomainForType(type) {
- debugger;
         const domain = [["account_id.acc_number", "=", this.state.acc_number]];
               if (type !== "transaction_all") {
                 domain.push(["transaction_type", "=", type]);

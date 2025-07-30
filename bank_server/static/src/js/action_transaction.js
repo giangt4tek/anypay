@@ -112,7 +112,6 @@ export class ActionTransation extends Component {
         return;
     }
    
-    debugger;
     const inputValue = parseInt(raw_value) || 0;
     // Kiểm tra điều kiện nhập điểm
     if (inputValue < 0) {
@@ -225,7 +224,7 @@ export class ActionTransation extends Component {
         mess = "Rút tiền ";
       else if (this.state.transactionType === 'transfer_out')
         mess = "Chuyển tiền ";
-      debugger;
+
       if (result.status) {
           if(this.state.transactionType === "deposit")
              {this.state.balance_total = this.state.balance_total + this.state.monneyAmount;}

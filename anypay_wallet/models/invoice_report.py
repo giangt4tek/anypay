@@ -71,5 +71,8 @@ class InvoiceReport(models.Model):
         for record in self:
             record.state = 'cancel'  # hoặc 'cancel' nếu bạn định nghĩa thêm trạng thái
 
+    def payment_from_wallet(self):
+        _logger.info(f"-----------> payment_from_wallet")
+
 
     

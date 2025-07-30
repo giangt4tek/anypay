@@ -19,6 +19,7 @@ patch(NavBar.prototype, {
     onWillStart(async () => {
       const menuItems = this.menuService.getApps();
       console.log(menuItems)
+        debugger;
       if (await user.hasGroup("base.group_system")) return;
       if (await user.hasGroup("bank_server.user_bank")) {
         const rootMenuItem = menuItems.find(

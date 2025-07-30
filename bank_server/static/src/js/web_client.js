@@ -27,6 +27,7 @@ patch(WebClient.prototype, {
       root = filteredArray[0];
       firstApp = root.appID;
     } 
+  
     if (firstApp) {
       return this.menuService.selectMenu(firstApp);
     }

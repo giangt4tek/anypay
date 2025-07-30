@@ -47,7 +47,7 @@
                 </group>
             </sheet>
             <footer>
-                <button name="payment_invoice_draft"
+                <button name="payment_draft_invoice"
                         string="Thanh toán từ ví"
                         type="object"
                         class="btn-primary"

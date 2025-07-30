@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<t t-inherit="web.NavBar" t-inherit-mode="primary" t-name="bank_server.CustomNavBar">
+    <xpath expr="//div[contains(@class,'o_user_menu')]" position="before">
+        <div class="o_account_info ms-3">
+            <t t-esc="state.accountName"/> -
+            <t t-esc="state.accountNumber"/>
+        </div>
+    </xpath>
+    <!-- Ẩn nút App -->
+    <xpath expr="//div[contains(@class,'o_menu_toggle')]" position="attributes">
+        <attribute name="t-if">false</attribute>
+    </xpath>
+</t>

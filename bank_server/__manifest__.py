@@ -33,6 +33,7 @@
         'views/res_partner_view.xml',
         'data/cron_invoice.xml',
         'views/menu_item.xml',
+       
         
         
     ],

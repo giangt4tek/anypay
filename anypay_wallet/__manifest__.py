@@ -31,7 +31,7 @@
         'views/res_partner_inherit.xml',
         'views/wallet_contact.xml',
         'views/res_partner_view.xml',
-        # 'data/cron_invoice.xml',
+        'data/cron_invoice.xml',
         'views/menu_item.xml',
         
         
