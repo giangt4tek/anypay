@@ -280,8 +280,9 @@ class _Get_WalletApiController(http.Controller):
                         ('acc_number', '=', invoice_info['acc_number']),
                         ('payment_uuid', '=', invoice_info['paymentUuid'])
                     ], limit=1)
-                    invoice_record.set_done(result.get('transactionUuid'))  # Cập nhật trạng thái hóa đơn thành 'done'
                    
+                    invoice_record.set_done(result.get('transactionUuid'))  # Cập nhật trạng thái hóa đơn thành 'done'
+            
                     return {
                         "status": 'Success',
                         "transactionUuid": result.get('transactionUuid'),
@@ -422,10 +423,10 @@ class _Get_WalletApiController(http.Controller):
                    'transfer_wallet': data['transferWallet'],
                    'transfer_uuid': data['transactionUuid']
                })
-           
+          
             return {
                 "status": True,
-                "transaction_uuid": data['transactionUuid'],
+                "transactionUuid": data['transactionUuid'],
                 "message": "Information Sync completed successfully!"}
         except Exception as e:
             return {

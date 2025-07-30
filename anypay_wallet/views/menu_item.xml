@@ -51,6 +51,10 @@
                   action="action_invoice_report" 
                   sequence="1" />
         
+        <menuitem id="menu_transaction_report" name="Hóa đơn giao dịch" 
+                  parent="menu_invoice_report_root" 
+                  action="action_transaction_report" 
+                  sequence="2" />
         
         <!-- <menuitem id="menu_transaction_report"
                     name="Báo cáo giao dịch"

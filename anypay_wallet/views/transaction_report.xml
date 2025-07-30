@@ -120,14 +120,10 @@
                 </list>
             </field>
         </record> -->
-        
-<!-- 
-<record id="action_transaction_report_deposit" model="ir.actions.act_window">
-    <field name="name">Giao dịch nạp tiền</field>
-    <field name="res_model">transaction.report</field>
-    <field name="view_mode">tree,form</field>
-    <field name="domain">[('transaction_type','=','deposit')]</field>
-    <field name="view_id" ref="view_transaction_report_deposit_tree"/>
-</record> -->
+        <record id="action_transaction_report" model="ir.actions.act_window">
+            <field name="name">Giao dịch nạp tiền</field>
+            <field name="res_model">transaction.report</field>
+            <field name="view_mode">list,form</field>
+        </record>
     </data>
 </odoo>
