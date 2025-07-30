@@ -80,6 +80,7 @@ class InvoiceReport(models.Model):
         if not draft_invoices:
             return results
         for rec in draft_invoices:
+            _logger.info("-----------> có hóa đơn:")
             result = rec.send_debt_paid()  # gọi hàm đã viết
             if result:
                 results.extend(result)  # append kết quả của từng record
