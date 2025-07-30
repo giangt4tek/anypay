@@ -1,9 +1,9 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_bank_report,access_bank_user_report,model_transaction_report,user_bank,1,0,1,0
-access_bank_manager_report,access_bank_manager_report,model_transaction_report,manager_bank,1,1,1,0
+access_bank_manager_report,access_bank_manager_report,model_transaction_report,manager_bank,1,1,1,1
 
 access_bank_invoice_report,access_bank_user_invoice_report,model_invoice_report,user_bank,1,1,1,0
-access_bank_manager_invoice_report,access_bank_manager_invoice_report,model_invoice_report,manager_bank,1,1,1,0
+access_bank_manager_invoice_report,access_bank_manager_invoice_report,model_invoice_report,manager_bank,1,1,1,1
 
 access_invoice_report,access_invoice_user_report,model_invoice_report,user_bank,1,0,1,0
 access_invoice_manager_report,access_invoice_manager_report,model_invoice_report,manager_bank,1,1,1,0

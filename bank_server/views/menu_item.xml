@@ -43,8 +43,8 @@
         <menuitem id="menu_invoice_report_root"
                   parent="menu_t4tek_bank_root" 
                   name="Quản lý hóa đơn" 
-                  sequence="10"
-                  groups="user_bank"/>
+                  sequence="30"
+                  groups="user_bank,manager_bank"/>
 
         <menuitem id="menu_invoice_report_main" name="Hóa đơn thanh toán" 
                   parent="menu_invoice_report_root" 
