@@ -44,7 +44,7 @@
                   parent="menu_t4tek_wallet_root" 
                   name="Quản lý hóa đơn" 
                   sequence="10"
-                  groups="user_wallet"/>
+                  groups="user_wallet, manager_wallet"/>
 
         <menuitem id="menu_invoice_report_main" name="Hóa đơn thanh toán" 
                   parent="menu_invoice_report_root" 

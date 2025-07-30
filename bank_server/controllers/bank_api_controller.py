@@ -90,8 +90,7 @@ class _Get_BankApiController(http.Controller):
                 "status": response.get('result', {}).get('status'),
                 "message": response.get('result', {}).get('message'),
                     }
-        
-            
+                
     @http.route('/api/token', type='http', auth='none', methods=['POST'], csrf=False)
     def get_api_key(self, **kwargs):
         data = request.httprequest.form
@@ -222,53 +221,7 @@ class _Get_BankApiController(http.Controller):
                     'Fail': invCreate['message']
                 }   
         
-    # @http.route('/api/invoice/payment', type='json', auth='none', methods=["POST"], csrf=False)
-    # def invoice_payment(self, **post):
-    #     raw_body = request.httprequest.get_data(as_text=True)
-    #     data = json.loads(raw_body)
-    #     transf_data = []
-    #     required_fields = ['debitAccnumber', 'debitBank',
-    #                        'paymentAccNumber', 'paymentBank']
-    #     for name in required_fields:
-    #         if not data.get(name):
-    #             return {
-    #                 'status': 'error',
-    #                 'message': 'Trường [{name}] không có dữ liệu'
-    #             }
-    #         else:
-    #            if name == 'paymentAccNumber':
-    #               transf_data['transferAccNumber'] = data[name]
-    #            elif name == 'paymentBank':
-    #               transf_data['transferBank'] = data[name]
-    #            elif name == 'debitAccnumber':
-    #               transf_data['acc_number'] = data[name]
-    #            elif name == 'debitBank':
-    #               transf_data['bank'] = data[name]
-    #            else: transf_data[name] = data[name]
-
-        
-    #     #invCreate = self.create_invoice(transf_data)    
-    #     # if not invCreate.status: 
-    #     #     return {
-    #     #             'status': 'error',
-    #     #             'message': 'Hóa đơn không được ghi nhận.',
-    #     #             'Fail': invCreate.message
-    #     #         }
-        
-    #     result = self._process_transaction(data)
-    #     if result.status:
-    #         return {
-    #                 "status": 'Success',
-    #                 "message": 'Thanh toán thành công'
-    #             }
-    #     else:
-    #         return {
-    #             "status": "error",
-    #             "message": f"Thanh toán thất bại",
-    #             "fail": result.message
-    #             }
-        
-
+    
 # -------------------------------------- Initialization Handl -------------------------------------------
     def check_access_bank(self, accNumber, Bank):
         bankAccount = request.env['t4tek.bank.account'].sudo().search([

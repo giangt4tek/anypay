@@ -1,7 +1,6 @@
 from odoo import models, fields, api
 import uuid
 import logging
-from odoo.http import request
 import json
 _logger = logging.getLogger(__name__)
 from ..controllers.bank_api_controller import _send_request
@@ -48,26 +47,27 @@ class InvoiceReport(models.Model):
 
     note = fields.Text(string='Ghi chú nội bộ')
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        result = []
-        for vals in vals_list:
-           if not vals.get('transaction_id'):
+    # @api.model_create_multi
+    # def create(self, vals_list):
+    #     result = []
+    #     for vals in vals_list:
+    #        if not vals.get('transaction_id'):
               
-              transactionUuid = str(uuid.uuid4())
-              vals['transaction_id'] = transactionUuid
-              result.append(vals)
+    #           transactionUuid = str(uuid.uuid4())
+    #           vals['transaction_id'] = transactionUuid
+    #           result.append(vals)
         
-        return super().create(result)
+    #     return super().create(result)
     
     @api.onchange('account_id')
     def _onchange_account_id(self):
         if self.account_id:
             self.partner_id = self.account_id.partner_id
 
-    def set_done(self):
+    def set_done(self, transaction_report_id=None):
         for record in self:
             record.state = 'done'
+            record.transaction_id = transaction_report_id  
 
     def set_cancel(self):
         for record in self:
@@ -134,7 +134,7 @@ class InvoiceReport(models.Model):
                     "message": message,
                 })
                 if status == 'Success':
-                    rec.set_done()
+                    rec.set_done(response.get('result', {}).get('transactionUuid'))
 
         return results
     

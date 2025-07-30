@@ -63,9 +63,10 @@ class InvoiceReport(models.Model):
         if self.account_id:
             self.partner_id = self.account_id.partner_id
 
-    def set_done(self):
+    def set_done(self, transaction_report_id=None):
         for record in self:
             record.state = 'done'
+            record.transaction_id = transaction_report_id    
 
     def set_cancel(self):
         for record in self:
