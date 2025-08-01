@@ -472,6 +472,7 @@ class _Get_BankApiController(http.Controller):
             ]
             for name in required_fields:
                 if not data.get(name):
+                    _logger.error(f'Trường [{name}] không có dữ liệu')
                     return {
                          'status': False,
                          'message': f'Trường [{name}] không có dữ liệu'  }
