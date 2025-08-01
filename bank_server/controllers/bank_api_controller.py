@@ -247,7 +247,7 @@ class _Get_BankApiController(http.Controller):
                 'buyerBank': seller_info.get('buyerBank'),
             }
 
-            _logger.info('------------------> vào cập nhật hóa đơn')
+            _logger.info('------------------> dữ liệu hóa đơn: %s', invoice_info)
             # === 2. Ghi nhận hóa đơn ===
             invCreate = self.create_invoice(invoice_info)
             if invCreate.get('status') == False and invCreate.get('is_ivoice') == False:
