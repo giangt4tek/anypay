@@ -234,8 +234,8 @@ class _Get_BankApiController(http.Controller):
             seller_info = data.get('seller', {})
             _logger.info('------------------> tạo dữ liệu hóa đơn')
             invoice_info = {
-                'acc_number': buyer_info.get('buyerAccount'),
-                'wallet': buyer_info.get('buyerBank'),
+                'acc_number': buyer_info.get('sellerAccount'),
+                'wallet': buyer_info.get('sellerBank'),
                 'invoiceNumber': data.get('invoiceNumber'),
                 'invoiceDate': data.get('invoiceDate'),
                 'POSLocal': data.get('posLocal') or '',
