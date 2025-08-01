@@ -228,23 +228,23 @@ class _Get_BankApiController(http.Controller):
             data = json.loads(raw_body)
             # raw_body = request.httprequest.get_data(as_text=True)
             # data = json.loads(raw_body)
-
+            _logger.info('------------------> json data: %s', data)
             # === 1. Tách dữ liệu ===
             buyer_info = data.get('buyer', {})
             seller_info = data.get('seller', {})
             _logger.info('------------------> tạo dữ liệu hóa đơn')
             invoice_info = {
-                'acc_number': buyer_info.get('sellerAccount'),
-                'wallet': buyer_info.get('sellerBank'),
+                'acc_number': seller_info.get('sellerAccount'),
+                'wallet': seller_info.get('sellerBank'),
                 'invoiceNumber': data.get('invoiceNumber'),
                 'invoiceDate': data.get('invoiceDate'),
                 'POSLocal': data.get('posLocal') or '',
                 'amount': data.get('amount'),
                 'description': data.get('description') or '',
                 'paymentUuid': data.get('paymentUuid'),
-                'buyerName': seller_info.get('buyerName'),
-                'buyerAccount': seller_info.get('buyerAccount'),
-                'buyerBank': seller_info.get('buyerBank'),
+                'buyerName': buyer_info.get('buyerName'),
+                'buyerAccount': buyer_info.get('buyerAccount'),
+                'buyerBank': buyer_info.get('buyerBank'),
             }
 
             _logger.info('------------------> dữ liệu hóa đơn: %s', invoice_info)
