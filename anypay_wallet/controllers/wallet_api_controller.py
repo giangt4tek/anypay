@@ -199,20 +199,20 @@ class _Get_WalletApiController(http.Controller):
             
     @http.route('/api/invoice/create', type='json', auth='none', methods=["POST"], csrf=False)
     def create_invoice_debit(self, **post):
-        auth_header = request.httprequest.headers.get('Authorization')
-        if not auth_header or not auth_header.startswith("Bearer "):
-            return {'status': 'error', 'message': _('Thiếu hoặc sai định dạng Authorization header')}
+        # auth_header = request.httprequest.headers.get('Authorization')
+        # if not auth_header or not auth_header.startswith("Bearer "):
+        #     return {'status': 'error', 'message': _('Thiếu hoặc sai định dạng Authorization header')}
     
-        token = auth_header.replace("Bearer ", "").strip()
+        # token = auth_header.replace("Bearer ", "").strip()
         raw_body = request.httprequest.get_data(as_text=True)
         data = json.loads(raw_body)
-        acc_number = data.get('acc_number')
-        auth_token = request.env['api.key'].sudo().search([ ('t4tek_acc.acc_number', '=', acc_number),], limit=1)
+        # acc_number = data.get('acc_number')
+        # auth_token = request.env['api.key'].sudo().search([ ('t4tek_acc.acc_number', '=', acc_number),], limit=1)
         
-        if (not auth_token and auth_token.name == token) or auth_token.expired_at < fields.Datetime.now():
-            return {
-                    'status': 'error',
-                    'message': 'Token không phù hợp với tài khoản này Hoặc chưa được cấp Hoặc đã hết hạn'}
+        # if (not auth_token and auth_token.name == token) or auth_token.expired_at < fields.Datetime.now():
+        #     return {
+        #             'status': 'error',
+        #             'message': 'Token không phù hợp với tài khoản này Hoặc chưa được cấp Hoặc đã hết hạn'}
 
         invCreate = self.create_invoice(data)    
         if invCreate['status']: 
