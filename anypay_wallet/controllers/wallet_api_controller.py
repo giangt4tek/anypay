@@ -488,10 +488,10 @@ class _Get_WalletApiController(http.Controller):
 
     def create_invoice(self, data):
         try:
-            _logger.info(f"----------> 0")
+            
             acc = self.check_access_wallet(data['acc_number'], data['wallet'])
             if not acc['status']: return acc
-            _logger.info(f"----------> 1")
+           
             invocie_is = request.env['invoice.report'].sudo().search([
                 ('invoice_number', '=', data['invoiceNumber']),
                  ('acc_number', '=', data['acc_number']),
@@ -503,7 +503,7 @@ class _Get_WalletApiController(http.Controller):
                     'invoice_state': invocie_is.state,
                     'message': 'Hóa đơn đã tồn tại.'
                 }
-            _logger.info(f"----------> 2")
+            
             required_fields = [
                 'invoiceNumber', 'invoiceDate',
                 'sellerName', 'sellerAccount', 'sellerBank',
@@ -514,7 +514,7 @@ class _Get_WalletApiController(http.Controller):
                     return {
                          'status': False,
                          'message': f'Trường [{name}] không có dữ liệu'  }
-            _logger.info(f"----------> 3")
+           
             invoice = request.env['invoice.report'].sudo().create({
                 'invoice_number': data.get('invoiceNumber'),
                 'invoice_date': data.get('invoiceDate'),
@@ -528,7 +528,7 @@ class _Get_WalletApiController(http.Controller):
                 'account_id': acc['walletAccount'].id,
                 'wallet': _WALLET
             })
-            _logger.info(f"----------> 4")
+           
             return {
                     'status': True,
                     'is_ivoice': True,

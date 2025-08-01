@@ -240,9 +240,9 @@ class _Get_BankApiController(http.Controller):
                 'amount': data.get('amount'),
                 'description': data.get('description') or '',
                 'paymentUuid': data.get('paymentUuid'),
-                'sellerName': seller_info.get('sellerName'),
-                'sellerAccount': seller_info.get('sellerAccount'),
-                'sellerBank': seller_info.get('sellerBank'),
+                'buyerName': seller_info.get('buyerName'),
+                'buyerAccount': seller_info.get('buyerAccount'),
+                'buyerBank': seller_info.get('buyerBank'),
             }
 
            

@@ -78,6 +78,7 @@ class InvoiceReport(models.Model):
         draft_invoices = self.sudo().search([('state', '=', 'draft')])
         if draft_invoices:
            for rec in draft_invoices:
+             
                 result = rec.send_debt_paid()  # gọi hàm đã viết
                 results.extend(result)  # append kết quả của từng record
        
@@ -87,17 +88,18 @@ class InvoiceReport(models.Model):
         results = []
 
         for rec in self.sudo():
-            bank_contact = self.env['bank.contact'].sudo().search([
-                ('bank_code', '=', rec.buyer_bank_code)], limit=1)
-            
+          
+            bank_contact = self.env['wallet.contact'].sudo().search([
+                ('wallet_code', '=', rec.seller_bank_code)], limit=1)
+            _logger.info(f"----------> Bank contact: {bank_contact}")
             if not bank_contact or not bank_contact.api_url:
                 results.append({
                     "invoice": rec.invoice_number,
                     "status": 'error',
-                    "message": f"Không có URL API của ngân hàng [{rec.buyer_bank_code}]"
+                    "message": f"Không có URL API của ngân hàng [{rec.seller_bank_code}]"
                 })
                 continue
-           
+          
             Data = rec._add_general_invoice_information()
             
             try:
@@ -110,14 +112,14 @@ class InvoiceReport(models.Model):
                     "message": f"Dữ liệu JSON không hợp lệ: {e}"
                 })
                 continue
-
+            _logger.info(f"----------> Chạy tới đây báo lỗi")
             response, error = _send_request(
                 method='POST',
                 url=f'{bank_contact.api_url}api/invoice/payment',
                 json_data=Data,
                 headers={'Content-Type': 'application/json'},
             )
-           
+            _logger.info('--------------> xong hết lỗi')
             if error:
                 results.append({
                     "invoice": rec.invoice_number,
@@ -211,6 +213,6 @@ class InvoiceReport(models.Model):
         seller_data = {
             'buyerName': str(self.partner_id.name if self.partner_id else ''),
             'buyerAccount': str(self.acc_number or ''),
-            'buyerBank': str(self.bank or ''),
+            'buyerBank': str(self.wallet or ''),
         }
         return seller_data
