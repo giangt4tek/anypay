@@ -222,7 +222,7 @@ class _Get_BankApiController(http.Controller):
                 }   
         
     @http.route('/api/invoice/sync', type='json', auth='none', methods=["POST"], csrf=False)
-    def sync_invoice_payment(self, **kwargs):
+    def sync_invoice_payment(self, **post):
         try:
             raw_body = request.httprequest.get_data(as_text=True)
             data = json.loads(raw_body)
@@ -447,8 +447,9 @@ class _Get_BankApiController(http.Controller):
 
     def create_invoice(self, data):
         try:
+            _logger.info('------------------> kiểm tra tài khoản ngân hàng')
             acc = self.check_access_bank(data['acc_number'], _BANK)
-            
+            _logger.info(f"------------------> status': {acc['status']} ")
             if not acc['status']: return acc
             _logger.info('------------------> tạo hóa đơn')
             invocie_is = request.env['invoice.report'].sudo().search([
