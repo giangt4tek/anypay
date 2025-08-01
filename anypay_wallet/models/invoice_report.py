@@ -115,7 +115,7 @@ class InvoiceReport(models.Model):
             _logger.info(f"----------> Chạy tới đây báo lỗi")
             response, error = _send_request(
                 method='POST',
-                url=f'{bank_contact.api_url}api/invoice/payment',
+                url=f'{bank_contact.api_url}api/invoice/sync',
                 json_data=Data,
                 headers={'Content-Type': 'application/json'},
             )

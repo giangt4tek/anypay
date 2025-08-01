@@ -221,7 +221,7 @@ class _Get_BankApiController(http.Controller):
                     'Fail': invCreate['message']
                 }   
         
-    @http.route('/api/invoice/payment', type='json', auth='none', methods=["POST"], csrf=False)
+    @http.route('/api/invoice/sync', type='json', auth='none', methods=["POST"], csrf=False)
     def sync_invoice_payment(self, data):
         try:
             # raw_body = request.httprequest.get_data(as_text=True)
@@ -230,7 +230,7 @@ class _Get_BankApiController(http.Controller):
             # === 1. Tách dữ liệu ===
             buyer_info = data.get('buyer', {})
             seller_info = data.get('seller', {})
-
+            _logger.info('------------------> tạo dữ liệu hóa đơn')
             invoice_info = {
                 'acc_number': buyer_info.get('buyerAccount'),
                 'wallet': buyer_info.get('buyerBank'),
@@ -245,7 +245,7 @@ class _Get_BankApiController(http.Controller):
                 'buyerBank': seller_info.get('buyerBank'),
             }
 
-           
+            _logger.info('------------------> vào cập nhật hóa đơn')
             # === 2. Ghi nhận hóa đơn ===
             invCreate = self.create_invoice(invoice_info)
             if invCreate.get('status') == False and invCreate.get('is_ivoice') == False:
@@ -448,7 +448,7 @@ class _Get_BankApiController(http.Controller):
             acc = self.check_access_bank(data['acc_number'], _BANK)
             
             if not acc['status']: return acc
-           
+            _logger.info('------------------> tạo hóa đơn')
             invocie_is = request.env['invoice.report'].sudo().search([
                 ('invoice_number', '=', data['invoiceNumber']),
                  ('acc_number', '=', data['acc_number']),
@@ -458,7 +458,6 @@ class _Get_BankApiController(http.Controller):
                     'status': False,
                     'is_ivoice': True,
                     'invoice_state': invocie_is.state,
-                    'transaction_id': invocie_is.transaction_id,
                     'message': 'Hóa đơn đã tồn tại.'
                 }
             
