@@ -463,7 +463,8 @@ class _Get_BankApiController(http.Controller):
                     'invoice_state': invocie_is.state,
                     'message': 'Hóa đơn đã tồn tại.'
                 }
-            
+            _logger.info('------------------> kiểm tra dữ liệu hóa đơn')
+            # Kiểm tra các trường bắt buộc
             required_fields = [
                 'invoiceNumber', 'invoiceDate', 'POSLocal',
                 'buyerName', 'buyerAccount', 'buyerBank',
@@ -474,7 +475,8 @@ class _Get_BankApiController(http.Controller):
                     return {
                          'status': False,
                          'message': f'Trường [{name}] không có dữ liệu'  }
-            
+            _logger.info('------------------> tạo hóa đơn mới')
+            # Tạo hóa đơn mới
             invoice = request.env['invoice.report'].sudo().create({
                 'invoice_number': data.get('invoiceNumber'),
                 'invoice_date': data.get('invoiceDate'),
@@ -488,7 +490,7 @@ class _Get_BankApiController(http.Controller):
                 'account_id': acc['bankAccount'].id,
                 'bank': _BANK
             })
-            
+            _logger.info('------------------> hóa đơn đã được tạo thành công')
             return {
                     'status': True,
                     'is_ivoice': True,
