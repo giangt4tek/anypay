@@ -254,15 +254,30 @@ class _Get_WalletApiController(http.Controller):
            
             # === 2. Ghi nhận hóa đơn ===
             invCreate = self.create_invoice(invoice_info)
-            if not invCreate.get('is_ivoice'):
+            if invCreate.get('status') == False and invCreate.get('is_ivoice') == False:
                 return {
                     'status': 'error',
-                    'message': 'Hóa đơn không được ghi nhận.',
-                    'fail': invCreate['message']
+                    'message': invCreate['message'],
+                     
                 }
+            if invCreate.get('invoice_state') == 'done' and invCreate.get('is_ivoice') == True:
+                
+                transfer_is = request.env['transaction.report'].sudo().search([
+                    ('transaction_type', '=', 'payment'),
+                    ('monney', '=', invoice_info['amount']),
+                    ('transfer_uuid', '=', invoice_info['transaction_id'])
+                ], limit=1).set_done(invCreate.get('transaction_id'))
+
+                if transfer_is:
+                    return {
+                        'status': 'notify',
+                        'message': 'Hóa đơn đã được thanh toán trước đó.',
+                        'transaction_id': invCreate.get('transaction_id')
+
+                    }
             
-          
-            if invCreate.get('invoice_state') == 'draft':  # Lấy trạng thái hóa đơn nếu cần
+            # Lấy trạng thái hóa đơn nếu cần
+            if invCreate.get('is_ivoice') == True and invCreate.get('invoice_state') == 'draft': 
             # === 3. Gọi xử lý thanh toán ===
                 transfer_data = {
                     'acc_number': buyer_info.get('buyerAccount'),
@@ -270,7 +285,9 @@ class _Get_WalletApiController(http.Controller):
                     'transferAccNumber': seller_info.get('sellerAccount'),
                     'transferWallet': seller_info.get('sellerBank'),
                     'transactionType': 'payment',
-                    'monneyAmount': data.get('amount'), }
+                    'monneyAmount': data.get('amount'), 
+                    'invoiceNumber': data.get('invoiceNumber'),
+                    'paymentUuid': data.get('paymentUuid'),}
                
                 result = self._process_transaction(transfer_data)
                 if result.get('status'):

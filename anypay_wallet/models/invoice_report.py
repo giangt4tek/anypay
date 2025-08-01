@@ -2,8 +2,9 @@ from odoo import models, fields, api
 import uuid
 import logging
 from odoo.http import request
+import json
 _logger = logging.getLogger(__name__)
-from ..controllers.wallet_api_controller import _send_request
+from ..controllers.wallet_api_controller import _send_request, _Get_WalletApiController
 
 class InvoiceReport(models.Model):
     _name = 'invoice.report'
@@ -46,17 +47,17 @@ class InvoiceReport(models.Model):
 
     note = fields.Text(string='Ghi chú nội bộ')
 
-    @api.model_create_multi
-    def create(self, vals_list):
-        result = []
-        for vals in vals_list:
-           if not vals.get('transaction_id'):
+    # @api.model_create_multi
+    # def create(self, vals_list):
+    #     result = []
+    #     for vals in vals_list:
+    #        if not vals.get('transaction_id'):
               
-              transactionUuid = str(uuid.uuid4())
-              vals['transaction_id'] = transactionUuid
-              result.append(vals)
+    #           transactionUuid = str(uuid.uuid4())
+    #           vals['transaction_id'] = transactionUuid
+    #           result.append(vals)
         
-        return super().create(result)
+    #     return super().create(result)
     
     @api.onchange('account_id')
     def _onchange_account_id(self):
@@ -73,7 +74,143 @@ class InvoiceReport(models.Model):
             record.state = 'cancel'  # hoặc 'cancel' nếu bạn định nghĩa thêm trạng thái
 
     def payment_from_wallet(self):
-        _logger.info(f"-----------> payment_from_wallet")
+        results = []
+        draft_invoices = self.sudo().search([('state', '=', 'draft')])
+        if draft_invoices:
+           for rec in draft_invoices:
+                result = rec.send_debt_paid()  # gọi hàm đã viết
+                results.extend(result)  # append kết quả của từng record
+       
+           return results
+        
+    def send_debt_paid(self):
+        results = []
 
+        for rec in self.sudo():
+            bank_contact = self.env['bank.contact'].sudo().search([
+                ('bank_code', '=', rec.buyer_bank_code)], limit=1)
+            
+            if not bank_contact or not bank_contact.api_url:
+                results.append({
+                    "invoice": rec.invoice_number,
+                    "status": 'error',
+                    "message": f"Không có URL API của ngân hàng [{rec.buyer_bank_code}]"
+                })
+                continue
+           
+            Data = rec._add_general_invoice_information()
+            
+            try:
+                json.dumps(Data)
+            except TypeError as e:
+                _logger.error("Payload JSON không hợp lệ: %s", e)
+                results.append({
+                    "invoice": rec.invoice_number,
+                    "status": 'error',
+                    "message": f"Dữ liệu JSON không hợp lệ: {e}"
+                })
+                continue
+
+            response, error = _send_request(
+                method='POST',
+                url=f'{bank_contact.api_url}api/invoice/payment',
+                json_data=Data,
+                headers={'Content-Type': 'application/json'},
+            )
+           
+            if error:
+                results.append({
+                    "invoice": rec.invoice_number,
+                    "status": 'error',
+                    "message": error,
+                })
+            else:
+                status = response.get('result', {}).get('status')
+                message = response.get('result', {}).get('message')
+                
+               
+                if status == 'Success':
+                    # Gọi hàm _process_transaction từ controller xử lý giao dịch
+                     # === 3. Gọi xử lý thanh toán ===
+                   
+                    transfer_data = {
+                        'acc_number': self.acc_number,
+                        'wallet': self.bank,
+                        'transferAccNumber': self.seller_account,
+                        'transferWallet': self.seller_bank_code,
+                        'transactionType': 'payment',
+                        'invoiceNumber': self.invoice_number,
+                        'paymentUuid': self.payment_uuid,
+                        'monneyAmount': self.amount, }
+                    
+                    controller = _Get_WalletApiController()
+                    process_result = controller._process_transaction(transfer_data)
+
+                    if process_result.get('status'):
+                       rec.set_done(response.get('result', {}).get('transactionUuid'))
+                    results.append({
+                        "status": status,
+                        "message": message,
+                    })
+                elif status == 'notify':
+                    transaction_id = response.get('result', {}).get('transaction_id')
+                    payment_is = request.env['transaction.report'].sudo().search([
+                        ('transaction_type', '=', 'payment'),
+                        ('monney', '=', rec.amount),
+                        ('transfer_uuid', '=', transaction_id)
+                        ], limit=1)
+                    if payment_is:
+                            rec.set_done(transaction_id)
+                            results.append({
+                             "status": status,
+                             "message": message,
+                            })
+                    else:
+                        results.append({
+                            "invoice": rec.invoice_number,
+                            "status": 'error',
+                            "message": f"Không tìm thấy giao dịch thanh toán với ID {transaction_id}",
+                        })
+                else:
+                    results.append({
+                        "invoice": rec.invoice_number,
+                        "status": status,
+                        "message": f"Thanh toán không thành công: {message}",
+                    })
+                
+
+        return results
+    
+    def _add_general_invoice_information(self):
+        self.ensure_one()
+        invoice_data = {
+            'invoiceNumber': str(self.invoice_number or ''),
+            'invoiceDate': self.invoice_date.strftime('%Y-%m-%d %H:%M:%S') if self.invoice_date else '',
+            'POSLocal': str(self.pos_local or ''),
+            'amount': float(self.amount or 0.0),
+            'description': str(self.description or ''),
+            'paymentUuid': str(self.payment_uuid or ''),
+            'buyer': self._add_buyer_information(),
+            'seller': self._add_seller_information(),
+            
+        }
+        return invoice_data
+    
+    def _add_seller_information(self):
+        self.ensure_one()
+        buyer_data = {
+            'sellerName': str(self.seller_name or ''),
+            'sellerAccount': str(self.seller_account or ''),
+            'sellerBank': str(self.seller_bank_code or ''),
+        }
+        return buyer_data
 
     
+    def _add_buyer_information(self):
+        self.ensure_one()
+        seller_data = {
+            'buyerName': str(self.partner_id.name if self.partner_id else ''),
+            'buyerAccount': str(self.acc_number or ''),
+            'buyerBank': str(self.bank or ''),
+        }
+        return seller_data

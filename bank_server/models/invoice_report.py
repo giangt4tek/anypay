@@ -2,6 +2,7 @@ from odoo import models, fields, api
 import uuid
 import logging
 import json
+from odoo.http import request
 _logger = logging.getLogger(__name__)
 from ..controllers.bank_api_controller import _send_request
 
@@ -129,12 +130,38 @@ class InvoiceReport(models.Model):
             else:
                 status = response.get('result', {}).get('status')
                 message = response.get('result', {}).get('message')
-                results.append({
-                    "status": status,
-                    "message": message,
-                })
+                transaction_id = response.get('result', {}).get('transaction_id')
+               
                 if status == 'Success':
                     rec.set_done(response.get('result', {}).get('transactionUuid'))
+                    results.append({
+                        "status": status,
+                        "message": message,
+                    })
+                elif status == 'notify':
+                    payment_is = request.env['transaction.report'].sudo().search([
+                        ('transaction_type', '=', 'payment'),
+                        ('monney', '=', rec.amount),
+                        ('transfer_uuid', '=', transaction_id)
+                        ], limit=1)
+                    if payment_is:
+                            rec.set_done(transaction_id)
+                            results.append({
+                             "status": status,
+                             "message": message,
+                            })
+                    else:
+                        results.append({
+                            "invoice": rec.invoice_number,
+                            "status": 'error',
+                            "message": f"Không tìm thấy giao dịch thanh toán với ID {transaction_id}",
+                        })
+                else:
+                    results.append({
+                        "invoice": rec.invoice_number,
+                        "status": 'error',
+                        "message": f"Trạng thái không thành công: {status}, {message}",
+                    })
 
         return results
     
