@@ -238,7 +238,7 @@ class _Get_BankApiController(http.Controller):
                 'wallet': seller_info.get('sellerBank'),
                 'invoiceNumber': data.get('invoiceNumber'),
                 'invoiceDate': data.get('invoiceDate'),
-                'POSLocal': data.get('posLocal') or '',
+                'POSLocal': data.get('POSLocal') or '',
                 'amount': data.get('amount'),
                 'description': data.get('description') or '',
                 'paymentUuid': data.get('paymentUuid'),
@@ -466,7 +466,7 @@ class _Get_BankApiController(http.Controller):
             _logger.info('------------------> kiểm tra dữ liệu hóa đơn')
             # Kiểm tra các trường bắt buộc
             required_fields = [
-                'invoiceNumber', 'invoiceDate', 'POSLocal',
+                'invoiceNumber', 'invoiceDate', 
                 'buyerName', 'buyerAccount', 'buyerBank',
                 'amount', 'paymentUuid'
             ]

@@ -242,7 +242,7 @@ class _Get_WalletApiController(http.Controller):
                 'wallet': buyer_info.get('buyerBank'),
                 'invoiceNumber': data.get('invoiceNumber'),
                 'invoiceDate': data.get('invoiceDate'),
-                'POSLocal': data.get('posLocal') or '',
+                'POSLocal': data.get('POSLocal') or '',
                 'amount': data.get('amount'),
                 'description': data.get('description') or '',
                 'paymentUuid': data.get('paymentUuid'),
