@@ -222,8 +222,10 @@ class _Get_BankApiController(http.Controller):
                 }   
         
     @http.route('/api/invoice/sync', type='json', auth='none', methods=["POST"], csrf=False)
-    def sync_invoice_payment(self, data):
+    def sync_invoice_payment(self, **kwargs):
         try:
+            raw_body = request.httprequest.get_data(as_text=True)
+            data = json.loads(raw_body)
             # raw_body = request.httprequest.get_data(as_text=True)
             # data = json.loads(raw_body)
 
