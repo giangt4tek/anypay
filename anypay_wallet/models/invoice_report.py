@@ -101,7 +101,7 @@ class InvoiceReport(models.Model):
                 continue
           
             Data = rec._add_general_invoice_information()
-            
+            _logger.info(f"----------> Data wallet: {Data}")
             try:
                 json.dumps(Data)
             except TypeError as e:
