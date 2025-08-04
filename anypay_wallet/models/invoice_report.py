@@ -4,7 +4,7 @@ import logging
 from odoo.http import request
 import json
 _logger = logging.getLogger(__name__)
-from ..controllers.wallet_api_controller import _send_request, _Get_WalletApiController
+
 
 class InvoiceReport(models.Model):
     _name = 'invoice.report'
@@ -91,7 +91,7 @@ class InvoiceReport(models.Model):
           
             bank_contact = self.env['wallet.contact'].sudo().search([
                 ('wallet_code', '=', rec.seller_bank_code)], limit=1)
-            _logger.info(f"----------> Bank contact: {bank_contact}")
+            
             if not bank_contact or not bank_contact.api_url:
                 results.append({
                     "invoice": rec.invoice_number,
@@ -99,27 +99,27 @@ class InvoiceReport(models.Model):
                     "message": f"Không có URL API của ngân hàng [{rec.seller_bank_code}]"
                 })
                 continue
-          
+
             Data = rec._add_general_invoice_information()
-            _logger.info(f"----------> Data wallet: {Data}")
+           
             try:
                 json.dumps(Data)
             except TypeError as e:
-                _logger.error("Payload JSON không hợp lệ: %s", e)
+            
                 results.append({
                     "invoice": rec.invoice_number,
                     "status": 'error',
                     "message": f"Dữ liệu JSON không hợp lệ: {e}"
                 })
                 continue
-            _logger.info(f"----------> Chạy tới đây báo lỗi")
-            response, error = _send_request(
+        
+            response, error = self.env['transaction.handle'].sudo()._send_request(
                 method='POST',
                 url=f'{bank_contact.api_url}api/invoice/sync',
                 json_data=Data,
                 headers={'Content-Type': 'application/json'},
             )
-            _logger.info('--------------> xong hết lỗi')
+            
             if error:
                 results.append({
                     "invoice": rec.invoice_number,
@@ -130,24 +130,23 @@ class InvoiceReport(models.Model):
                 status = response.get('result', {}).get('status')
                 message = response.get('result', {}).get('message')
                 
-               
                 if status == 'Success':
                     # Gọi hàm _process_transaction từ controller xử lý giao dịch
                      # === 3. Gọi xử lý thanh toán ===
                    
                     transfer_data = {
                         'acc_number': self.acc_number,
-                        'wallet': self.bank,
+                        'wallet': self.wallet,
                         'transferAccNumber': self.seller_account,
                         'transferWallet': self.seller_bank_code,
                         'transactionType': 'payment',
                         'invoiceNumber': self.invoice_number,
                         'paymentUuid': self.payment_uuid,
                         'monneyAmount': self.amount, }
-                    
-                    controller = _Get_WalletApiController()
-                    process_result = controller._process_transaction(transfer_data)
-
+                
+                   
+                    process_result = self.env['transaction.handle']._process_transaction(transfer_data)
+                  
                     if process_result.get('status'):
                        rec.set_done(response.get('result', {}).get('transactionUuid'))
                     results.append({
@@ -156,7 +155,7 @@ class InvoiceReport(models.Model):
                     })
                 elif status == 'notify':
                     transaction_id = response.get('result', {}).get('transaction_id')
-                    payment_is = request.env['transaction.report'].sudo().search([
+                    payment_is = self.env['transaction.report'].sudo().search([
                         ('transaction_type', '=', 'payment'),
                         ('monney', '=', rec.amount),
                         ('transfer_uuid', '=', transaction_id)
