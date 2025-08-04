@@ -106,7 +106,6 @@ class InvoiceReport(models.Model):
             try:
                 json.dumps(Data)
             except TypeError as e:
-                _logger.error("Payload JSON không hợp lệ: %s", e)
                 results.append({
                     "invoice": rec.invoice_number,
                     "status": 'error',

@@ -176,9 +176,9 @@ class _Get_BankApiController(http.Controller):
                     'status': 'error',
                     'message': f'Trường [{name}] không có dữ liệu'
                     }
-        _logger.info('------------------> Tạo dữ liệu chuyển khoản')          
+       
         result = self._process_transaction(data)
-        _logger.info('------------------> Kết quả xử lý chuyển khoản: %s', result)
+        
         if result.get('status'): 
             return {
                     "status": 'Success',
@@ -344,9 +344,9 @@ class _Get_BankApiController(http.Controller):
         try:
             error = None
             transfer_bank= ''
-            _logger.info('------------------> Bắt đầu xử lý giao dịch')
+     
             acc = self.check_access_bank(data['acc_number'], data['bank'])
-            _logger.info('------------------> Kiểm tra quyền truy cập ngân hàng: %s', acc)
+           
             if not acc.get('status'): return acc
            
         # ---------------   Xử lý khi giao dịch dạng Chuyển khoản --------------------
@@ -378,7 +378,6 @@ class _Get_BankApiController(http.Controller):
         # ---------------              *********                  --------------------
 
         # ---------------   Xử lý khi giao dịch dạng Thanh toán hóa đơn --------------------
-            _logger.info('------------------> Xử lý thanh toán hóa đơn')
             if data['transactionType'] == 'payment':
                 required_fields = ['invoiceNumber', 'acc_number', 'paymentUuid']
                 for name in required_fields:
@@ -387,18 +386,17 @@ class _Get_BankApiController(http.Controller):
                             'status': False,
                             'message': f'Trường [{name}] không có dữ liệu'
                             }
-                _logger.info('------------------> Tạo dữ liệu hóa đơn')
+              
                 invocie = request.env['invoice.report'].sudo().search([
                             ('invoice_number', '=', data['invoiceNumber']),
                             ('acc_number', '=', data['acc_number']),
                             ('payment_uuid', '=', data['paymentUuid'])], limit=1)
-                _logger.info('------------------> Hóa đơn tìm thấy: %s', invocie)
+               
                 if invocie:
                    invocie.set_done(data['transactionUuid'])
         # ---------------              *********                  --------------------
           
             if data['bank'] == _BANK:
-               _logger.info('------------------> Ghi nhận giao dịch trong hệ thống')
                request.env['transaction.report'].sudo().create({
                    'account_id': acc['bankAccount'].id,
                    'transaction_type': data['transactionType'],
