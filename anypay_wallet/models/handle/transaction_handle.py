@@ -176,7 +176,8 @@ class TransactionHandle(models.Model):
                
                 payload = {}
             
-                required_fields = ['monneyAmount',
+                required_fields = ['monneyAmount', 'invoiceNumber', 'paymentUuid',
+                                   'transactionType',
                                    'acc_number', 'transferAccNumber',
                                    'transferWallet']
         
