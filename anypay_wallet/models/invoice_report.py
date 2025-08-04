@@ -148,7 +148,7 @@ class InvoiceReport(models.Model):
                     process_result = self.env['transaction.handle']._process_transaction(transfer_data)
                   
                     if process_result.get('status'):
-                       rec.set_done(response.get('result', {}).get('transactionUuid'))
+                       rec.set_done(process_result.get('transactionUuid'))
                     results.append({
                         "status": status,
                         "message": message,
