@@ -199,20 +199,9 @@ class _Get_WalletApiController(http.Controller):
             
     @http.route('/api/invoice/sync', type='json', auth='none', methods=["POST"], csrf=False)
     def create_invoice_debit(self, **post):
-        # auth_header = request.httprequest.headers.get('Authorization')
-        # if not auth_header or not auth_header.startswith("Bearer "):
-        #     return {'status': 'error', 'message': _('Thiếu hoặc sai định dạng Authorization header')}
-    
-        # token = auth_header.replace("Bearer ", "").strip()
         raw_body = request.httprequest.get_data(as_text=True)
         data = json.loads(raw_body)
-        # acc_number = data.get('acc_number')
-        # auth_token = request.env['api.key'].sudo().search([ ('t4tek_acc.acc_number', '=', acc_number),], limit=1)
-        
-        # if (not auth_token and auth_token.name == token) or auth_token.expired_at < fields.Datetime.now():
-        #     return {
-        #             'status': 'error',
-        #             'message': 'Token không phù hợp với tài khoản này Hoặc chưa được cấp Hoặc đã hết hạn'}
+     
         _logger.info(f"----------> Received data: {data}")
         invCreate = request.env["transaction.handle"].create_invoice(data)    
         if invCreate['status']: 
@@ -234,8 +223,13 @@ class _Get_WalletApiController(http.Controller):
             data = json.loads(raw_body)
             _logger.info(f"----------> Received data: {data}")
             # === 1. Tách dữ liệu ===
-            buyer_info = data.get('buyer', {})
-            seller_info = data.get('seller', {})
+            buyer_info = data['buyer'] if isinstance(data.get('buyer'), dict) else None
+            seller_info = data['seller'] if isinstance(data.get('seller'), dict) else None
+            if not buyer_info or not seller_info:
+                return {
+                    'status': 'error',
+                    'message': 'Thiếu thông tin người mua hoặc người bán.'
+                }
 
             invoice_info = {
                 'acc_number': buyer_info.get('buyerAccount'),
@@ -274,38 +268,50 @@ class _Get_WalletApiController(http.Controller):
                         'status': 'notify',
                         'message': 'Hóa đơn đã được thanh toán trước đó.',
                         'transaction_id': invCreate.get('transaction_id')
-
                     }
             
             # Lấy trạng thái hóa đơn nếu cần
             if invCreate.get('is_ivoice') == True and invCreate.get('invoice_state') == 'draft': 
             # === 3. Gọi xử lý thanh toán ===
-                transfer_data = {
-                    'acc_number': buyer_info.get('buyerAccount'),
-                    'wallet': buyer_info.get('buyerBank'),
-                    'transferAccNumber': seller_info.get('sellerAccount'),
-                    'transferWallet': seller_info.get('sellerBank'),
-                    'transactionType': 'payment',
-                    'monneyAmount': data.get('amount'), 
-                    'invoiceNumber': data.get('invoiceNumber'),
-                    'paymentUuid': data.get('paymentUuid'),}
-                
-                result = request.env["transaction.handle"]._process_transaction(transfer_data)
-                if result.get('status'):
-                    # === 4. Cập nhật trạng thái hóa đơn ===
-                    invoice_record = request.env['invoice.report'].sudo().search([
+                invoice_record = request.env['invoice.report'].sudo().search([
                         ('invoice_number', '=', invoice_info['invoiceNumber']),
                         ('acc_number', '=', invoice_info['acc_number']),
                         ('payment_uuid', '=', invoice_info['paymentUuid'])
                     ], limit=1)
-                   
-                    invoice_record.set_done(result.get('transactionUuid'))  # Cập nhật trạng thái hóa đơn thành 'done'
-            
-                    return {
+                
+                if invoice_record: 
+                   result = invoice_record.send_debt_paid()
+                   return {
                         "status": 'Success',
                         "transactionUuid": result.get('transactionUuid'),
                         "message": 'Thanh toán thành công'
                     }
+                # transfer_data = {
+                #     'acc_number': buyer_info.get('buyerAccount'),
+                #     'wallet': buyer_info.get('buyerBank'),
+                #     'transferAccNumber': seller_info.get('sellerAccount'),
+                #     'transferWallet': seller_info.get('sellerBank'),
+                #     'transactionType': 'payment',
+                #     'monneyAmount': data.get('amount'), 
+                #     'invoiceNumber': data.get('invoiceNumber'),
+                #     'paymentUuid': data.get('paymentUuid'),}
+                
+                # result = request.env["transaction.handle"]._process_transaction(transfer_data)
+                #if result.get('status'):
+                    # === 4. Cập nhật trạng thái hóa đơn ===
+                    # invoice_record = request.env['invoice.report'].sudo().search([
+                    #     ('invoice_number', '=', invoice_info['invoiceNumber']),
+                    #     ('acc_number', '=', invoice_info['acc_number']),
+                    #     ('payment_uuid', '=', invoice_info['paymentUuid'])
+                    # ], limit=1)
+                   
+                    #invoice_record.set_done(result.get('transactionUuid'))  # Cập nhật trạng thái hóa đơn thành 'done'
+            
+                    # return {
+                    #     "status": 'Success',
+                    #     "transactionUuid": result.get('transactionUuid'),
+                    #     "message": 'Thanh toán thành công'
+                    # }
                 else:
                     return {
                         "status": "error",

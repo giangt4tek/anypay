@@ -119,7 +119,7 @@ class InvoiceReport(models.Model):
                 #transaction_id = response.get('result', {}).get('transaction_id')
                
                 if status == 'Success':
-                    #rec.set_done(response.get('result', {}).get('transactionUuid'))
+                    rec.set_done(response.get('result', {}).get('transactionUuid'))
                     results.append({
                         "status": status,
                         "message": message,
@@ -151,8 +151,8 @@ class InvoiceReport(models.Model):
     def _add_buyer_information(self):
         self.ensure_one()
         buyer_data = {
-            'acc_number': str(self.buyer_account or ''),
-            'wallet': str(self.buyer_wallet or ''),
+            'buyerAccount': str(self.buyer_account or ''),
+            'buyerBank': str(self.buyer_wallet or ''),
         }
         return buyer_data
 

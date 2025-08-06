@@ -127,7 +127,7 @@ class _Get_BankApiController(http.Controller):
         if existing_key:
             return Response(
                 json.dumps({
-                    'api_key': existing_key.name,
+                    'api_key': existing_key.token,
                     'expires_at': existing_key.expired_at.isoformat()
                 }),
                 content_type='application/json')
@@ -216,14 +216,14 @@ class _Get_BankApiController(http.Controller):
             _logger.info("Tạo hóa đơn mới với dữ liệu: %s", data)
             # Tạo hóa đơn mới
             invoice = request.env['invoice.report'].sudo().create({
-                'invoice_number': data.get('invoiceNumber'),
-                'invoice_date': data.get('invoiceDate'),
-                'pos_id': data.get('pos_id'),
-                'buyer_account': data.get('buyerAccount'),
-                'buyer_wallet': data.get('buyerWallet'),
-                'amount': data.get('amount'),
-                'description': data.get('description') if data.get('description') else '',
-                'payment_uuid': data.get('paymentUuid'),
+                'invoice_number': data['invoiceNumber'],
+                'invoice_date': data['invoiceDate'],
+                'pos_id': data['pos'].id,
+                'buyer_account': data['buyerAccount'],
+                'buyer_wallet':data['buyerWallet'],
+                'amount': data['amount'],
+                'description': data['description'] if data['description'] else '',
+                'payment_uuid': data['paymentUuid'],
                
             })
 

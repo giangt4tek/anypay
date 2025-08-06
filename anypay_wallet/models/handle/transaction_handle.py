@@ -278,6 +278,7 @@ class TransactionHandle(models.Model):
                     'status': False,
                     'is_ivoice': True,
                     'invoice_state': invocie_is.state,
+                    'transaction_id': invocie_is.transaction_id,
                     'message': 'Hóa đơn đã tồn tại.'
                 }
             

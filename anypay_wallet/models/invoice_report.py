@@ -151,6 +151,7 @@ class InvoiceReport(models.Model):
                        rec.set_done(process_result.get('transactionUuid'))
                     results.append({
                         "status": status,
+                        "transactionUuid": process_result.get('transactionUuid'),
                         "message": message,
                     })
                 elif status == 'notify':
