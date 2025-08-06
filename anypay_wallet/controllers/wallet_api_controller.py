@@ -232,7 +232,7 @@ class _Get_WalletApiController(http.Controller):
         try:
             raw_body = request.httprequest.get_data(as_text=True)
             data = json.loads(raw_body)
-
+            _logger.info(f"----------> Received data: {data}")
             # === 1. Tách dữ liệu ===
             buyer_info = data.get('buyer', {})
             seller_info = data.get('seller', {})
@@ -251,10 +251,11 @@ class _Get_WalletApiController(http.Controller):
                 'sellerBank': seller_info.get('sellerBank'),
             }
 
-           
+            _logger.info(f"----------> Invoice info: {invoice_info}")
             # === 2. Ghi nhận hóa đơn ===
             
             invCreate = request.env["transaction.handle"].create_invoice(invoice_info)
+            _logger.info(f"----------> Invoice creation result: {invCreate}")
             if invCreate.get('status') == False and invCreate.get('is_ivoice') == False:
                 return {
                     'status': 'error',

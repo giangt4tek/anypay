@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+      
+
+        <!-- MENU ROOT -->
+        <menuitem id="menu_pos_category_root"
+                  groups="pos_manager,pos_user"
+                  name="POS Category"  />
+   
+        <!-- MENU ITEM -->
+        <menuitem id="pos_category"
+                  name="Quản lý hệ thống POS"
+                  parent="menu_pos_category_root"
+                  action="action_pos_category"
+                  groups="pos_manager"/>
+
+        <!-- <menuitem id="menu_contact_bank_root" name="Bank" sequence="10" groups="pos_manager"/> -->
+
+
+        <menuitem id="menu_wallet_contact" 
+                  name="Danh sách ví thanh toán" 
+                  parent="menu_pos_category_root" 
+                  action="action_wallet_contact"
+                  sequence="10"
+                  groups="pos_manager"/>  
+       
+        <menuitem id="menu_invoice_report_root"
+                  parent="menu_pos_category_root" 
+                  name="Quản lý hóa đơn" 
+                  groups="pos_user,pos_manager"/>
+
+        <menuitem id="menu_invoice_report_main" name="Hóa đơn thanh toán" 
+                  parent="menu_invoice_report_root" 
+                  action="action_invoice_report" />
+
+        
+        <!-- <menuitem id="menu_transaction_report"
+                    name="Báo cáo giao dịch"
+                    parent="menu_pos_category_root"
+                    action="action_transaction_report_group"
+                    sequence="30"
+                    groups="pos_user"/> -->
+
+        <!-- <menuitem id="menu_bank_dashboard" 
+                  name="Dashboard" 
+                  parent="menu_pos_category_root"
+                  sequence="10"
+                  groups="pos_user"/>
+
+        <menuitem id="menu_transaction_dashboard" 
+                  name="Quản lý giao dịch"
+                  sequence="11"
+                  parent="menu_bank_dashboard" 
+                  action="action_transaction_dashboard_view" /> -->
+    </data>
+</odoo>

@@ -1,0 +1,10 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+
+access_pos_invoice_report,access_pos_invoice_report,model_invoice_report,pos_user,1,0,0,0
+access_pos_manager_invoice_report,access_pos_manager_invoice_report,model_invoice_report,pos_manager,1,1,1,1
+
+access_pos_user,access_pos_user,model_pos_category,pos_user,0,0,0,0
+access_pos_manager,access_pos_manager,model_pos_category,pos_manager,1,1,1,1
+
+access_pos_contact,access_pos_contact,model_wallet_contact,pos_user,0,0,0,0
+access_pos_manager_contact,access_pos_manager_contact,model_wallet_contact,pos_manager,1,1,1,1

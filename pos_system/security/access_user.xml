@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="cate_groups_pos" model="ir.module.category">
+        <field name="name">POS Report System</field>
+    </record>
+
+    <record id="pos_user" model="res.groups">
+        <field name="name">POS User</field>
+        <field name="category_id" ref="cate_groups_pos"/>
+    </record>
+
+    <record id="pos_manager" model="res.groups">
+        <field name="name">POS Manager</field>
+        <field name="category_id" ref="cate_groups_pos"/>
+    </record>
+</odoo>

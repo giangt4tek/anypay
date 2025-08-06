@@ -27,7 +27,6 @@ class T4tekBankAccount(models.Model):
                     break
             
             raw_key = str(uuid.uuid4())
-            
             hashed_key = hashlib.sha256((raw_key).encode()).hexdigest()
             rec.client_key = hashed_key
             rec.acc_number = new_number
