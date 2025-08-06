@@ -259,9 +259,8 @@ class _Get_WalletApiController(http.Controller):
             if invCreate.get('status') == False and invCreate.get('is_ivoice') == False:
                 return {
                     'status': 'error',
-                    'message': invCreate['message'],
-                     
-                }
+                    'message': invCreate['message'],}
+            
             if invCreate.get('invoice_state') == 'done' and invCreate.get('is_ivoice') == True:
                 
                 transfer_is = request.env['transaction.report'].sudo().search([

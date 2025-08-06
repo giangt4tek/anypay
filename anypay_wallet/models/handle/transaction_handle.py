@@ -265,7 +265,9 @@ class TransactionHandle(models.Model):
         try:
             
             acc = self.check_access_wallet(data['acc_number'], data['wallet'])
-            if not acc['status']: return acc
+            if not acc['status']: 
+                acc['is_ivoice'] = False
+                return acc
            
             invocie_is = self.env['invoice.report'].sudo().search([
                 ('invoice_number', '=', data['invoiceNumber']),
