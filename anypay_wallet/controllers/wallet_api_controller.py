@@ -259,15 +259,14 @@ class _Get_WalletApiController(http.Controller):
                 
                 transfer_is = request.env['transaction.report'].sudo().search([
                     ('transaction_type', '=', 'payment'),
-                    ('monney', '=', invoice_info['amount']),
-                    ('transfer_uuid', '=', invoice_info['transaction_id'])
-                ], limit=1).set_done(invCreate.get('transaction_id'))
+                    ('transfer_uuid', '=', invCreate.get('transaction_id'))
+                ], limit=1)
 
                 if transfer_is:
                     return {
                         'status': 'notify',
                         'message': 'Hóa đơn đã được thanh toán trước đó.',
-                        'transaction_id': invCreate.get('transaction_id')
+                        'transactionUuid': invCreate.get('transaction_id')
                     }
             
             # Lấy trạng thái hóa đơn nếu cần

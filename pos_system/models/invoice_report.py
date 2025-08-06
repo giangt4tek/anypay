@@ -124,6 +124,12 @@ class InvoiceReport(models.Model):
                         "status": status,
                         "message": message,
                     })
+                elif status == 'notify':
+                    rec.set_done(response.get('result', {}).get('transactionUuid'))
+                    results.append({
+                        "status": status,
+                        "message": message,
+                    })
                 else:
                     results.append({
                         "invoice": rec.invoice_number,
