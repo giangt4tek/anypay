@@ -66,7 +66,9 @@ class InvoiceReport(models.Model):
         results = []
         draft_invoices = self.sudo().search([('state', '=', 'draft')])
         if draft_invoices:
+           _logger.info('---------------> draft_invoices %s', draft_invoices)
            for rec in draft_invoices:
+                _logger.info('---------------> rec %s', rec)
                 result = rec.send_debt_paid()  # gọi hàm đã viết
                 results.extend(result)  # append kết quả của từng record
        

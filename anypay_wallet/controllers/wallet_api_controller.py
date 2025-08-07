@@ -221,7 +221,7 @@ class _Get_WalletApiController(http.Controller):
         try:
             raw_body = request.httprequest.get_data(as_text=True)
             data = json.loads(raw_body)
-            _logger.info(f"----------> Received data: {data}")
+            _logger.info(f"----------> Nhận HĐ")
             # === 1. Tách dữ liệu ===
             buyer_info = data['buyer'] if isinstance(data.get('buyer'), dict) else None
             seller_info = data['seller'] if isinstance(data.get('seller'), dict) else None
@@ -245,11 +245,11 @@ class _Get_WalletApiController(http.Controller):
                 'sellerBank': seller_info.get('sellerBank'),
             }
 
-            _logger.info(f"----------> Invoice info: {invoice_info}")
+            _logger.info(f"----------> Tạo HĐ")
             # === 2. Ghi nhận hóa đơn ===
             
             invCreate = request.env["transaction.handle"].create_invoice(invoice_info)
-            _logger.info(f"----------> Invoice creation result: {invCreate}")
+           
             if invCreate.get('status') == False and invCreate.get('is_ivoice') == False:
                 return {
                     'status': 'error',
@@ -279,6 +279,8 @@ class _Get_WalletApiController(http.Controller):
                     ], limit=1)
                 
                 if invoice_record: 
+                   _logger.info(f"----------> Gọi xử lý thanh toán")
+                    # Gọi hàm send_debt_paid để xử lý thanh toán
                    result = invoice_record.send_debt_paid()
                    return {
                         "status": 'Success',
@@ -329,226 +331,3 @@ class _Get_WalletApiController(http.Controller):
                 "message": f"Lỗi hệ thống: {str(e)}"
             }
         
-
-# -------------------------------------- Initialization Handl -------------------------------------------
-    # def check_access_wallet(self, accNumber, Wallet):
-    #     walletAccount = request.env['t4tek.wallet.account'].sudo().search([
-    #         ('acc_number', '=', accNumber)], limit=1)
-    #     error = None
-    #     if Wallet != _WALLET: error = 'Ví AnyPay nhận không phù hợp'
-    #     if not walletAccount:  error = f'Tài khoản này không tồn tại trong Ví AnyPay {_WALLET}'
-    #     if walletAccount and Wallet == _WALLET:
-    #         return {
-    #             "status": True,
-    #             "walletAccount": walletAccount
-    #         }
-    #     else: return {
-    #             "status": False,
-    #             "message": error
-    #             }
-
-    # def _process_transaction(self, data):
-    #     try:
-    #         error = None
-    #         transfer_wallet= ''
-    #         acc = self.check_access_wallet(data['acc_number'], data['wallet'])
-    #         _logger.info(f"----------> 1")
-    #         if not acc.get('status'): return acc
-            
-    #         if data['transactionType'] in ['withdrawal', 'transfer_out', 'payment'] and getattr(acc['walletAccount'], 'balance_account', 0) < data['monneyAmount']:
-    #             return {
-    #                 "status": False,
-    #                 "message": f"Số dư không đủ để thực hiện giao dịch."
-    #             }
-    #         _logger.info(f"----------> 2")
-    #     # ---------------   Xử lý khi giao dịch dạng Chuyển khoản --------------------
-    #         if data['transactionType'] == 'transfer_out':
-                
-    #             if data['transferAccNumber'] == data['acc_number'] and data['transferWallet'] == _WALLET:
-    #                 return {
-    #                     "status": False,
-    #                     "message": f"Vui lòng không nhập tài khoản của chính mình trong Ví AnyPay hiện tại"
-    #                 }
-                
-    #             if data['transferWallet']:
-    #                 transfer_wallet = data['transferWallet']
-    #             else:
-    #                 return {
-    #                     "status": False,
-    #                     "message": f"Không có thông tin Ví AnyPay cần chuyển"
-    #                 }
-                
-    #             payload, error = self._add_tranfer_data(data, acc['walletAccount'], transfer_wallet, 'transfer_in')
-    #             if error:
-    #                 return {"status": False, "message": error}
-                
-    #             result = self.send_transfer_request(payload, transfer_wallet)
-                
-    #             if result.get('status') == 'error':
-    #                 return {"status": False, "message": result.get('message')}
-                
-    #             data['transactionUuid'] = payload['transactionUuid']
-    #     # ---------------              *********                  --------------------
-                
-    #     # ---------------   Xử lý khi giao dịch dạng Thanh toán hóa đơn --------------------
-    #         _logger.info(f"----------> 3")
-    #         if data['transactionType'] == 'payment':
-    #             if data['transferAccNumber'] == data['acc_number'] and data['transferWallet'] == _WALLET:
-    #                 return {
-    #                     "status": False,
-    #                     "message": f"Vui lòng không nhập tài khoản của chính mình trong Ví AnyPay hiện tại"
-    #                 }
-
-    #             # if data['transferWallet']:
-    #             #     transfer_wallet = data['transferWallet']
-    #             # else:
-    #             #     return {
-    #             #         "status": False,
-    #             #         "message": f"Không có thông tin Ví AnyPay cần chuyển"
-    #             #     }
-
-    #             _logger.info(f"----------> Data payment: {data}")
-    #             payload = {}
-            
-    #             required_fields = ['monneyAmount',
-    #                                'acc_number', 'transferAccNumber',
-    #                                'transferWallet']
-        
-    #             for name in required_fields:
-    #                 if not data.get(name):
-    #                     error = f'Trường [{name}] không có dữ liệu'
-    #                     return {"status": False, "message": error}
-    #                 payload[name] = data[name]
-    #             _logger.info(f"----------> check fields payload: {payload}")
-    #             # Chỉ thêm UUID nếu không có lỗi
-    #             transactionUuid = str(uuid.uuid4())
-    #             payload['transactionType'] = data['transactionType']
-    #             payload['transactionUuid'] = transactionUuid
-    #             payload['acc_number'] = data['transferAccNumber']
-    #             payload['bank'] = data['transferWallet']
-    #             payload['transferAccNumber'] = data['acc_number']
-    #             payload['transferBank'] = _WALLET
-    #             _logger.info(f"----------> upload payload: {payload}")
-    #             if len(payload) < 6:
-    #                 error = 'Không có đủ thông tin yêu cầu'
-                
-    #             if error:
-    #                 return {"status": False, "message": error}
-                
-    #             data['transactionUuid'] = payload['transactionUuid']
-    #             _logger.info(f"----------> send Data payment: {payload}")
-    #             result = self.send_transfer_request(payload, data['transferWallet'])
-    #             if result.get('status') == 'error':
-    #                 return {"status": False, "message": result.get('message')}
-    #             _logger.info(f"----------> result payment: {result}")
-    #     # ---------------              *********                  --------------------
-          
-    #         if data['wallet'] == _WALLET:
-             
-    #            request.env['transaction.report'].sudo().create({
-    #                'account_id': acc['walletAccount'].id,
-    #                'transaction_type': data['transactionType'],
-    #                'transaction_date': fields.Datetime.now(),
-    #                'monney': data['monneyAmount'],
-    #                'transfer_acc_number': data['transferAccNumber'],
-    #                'wallet': _WALLET,
-    #                'transfer_wallet': data['transferWallet'],
-    #                'transfer_uuid': data['transactionUuid']
-    #            })
-          
-    #         return {
-    #             "status": True,
-    #             "transactionUuid": data['transactionUuid'],
-    #             "message": "Information Sync completed successfully!"}
-    #     except Exception as e:
-    #         return {
-    #             "status": False,
-    #             "message": f"Lỗi hệ thống: {str(e)}"
-    #         }
-        
-    # def _add_tranfer_data(self, infor, accNumOut, transfer_wallet, type):
-    #     result = {}
-    #     error =None
-    #     required_fields = ['transactionType', 'monneyAmount',
-    #                        'acc_number', 'transferAccNumber',
-    #                        'wallet', 'transferWallet']
-
-    #     for name in required_fields:
-    #         if not infor.get(name):
-    #             error = f'Trường [{name}] không có dữ liệu'
-    #             return {}, error
-    #         result[name] = infor[name]
-
-    #     # Chỉ thêm UUID nếu không có lỗi
-       
-    #     transactionUuid = str(uuid.uuid4())
-    #     result['transactionType'] = type
-    #     result['transactionUuid'] = transactionUuid
-    #     result['acc_number'] = result['transferAccNumber']
-    #     result['transferAccNumber'] = accNumOut.acc_number
-    #     result['wallet'] = transfer_wallet
-    #     result['transferWallet'] = _WALLET
-
-    #     if len(result) < 6:
-    #         error = 'Không có đủ thông tin yêu cầu'
-        
-    #     return result, error
-
-    # def create_invoice(self, data):
-    #     try:
-            
-    #         acc = self.check_access_wallet(data['acc_number'], data['wallet'])
-    #         if not acc['status']: return acc
-           
-    #         invocie_is = request.env['invoice.report'].sudo().search([
-    #             ('invoice_number', '=', data['invoiceNumber']),
-    #              ('acc_number', '=', data['acc_number']),
-    #              ('payment_uuid', '=', data['paymentUuid'])], limit=1)
-    #         if invocie_is:
-    #             return {
-    #                 'status': False,
-    #                 'is_ivoice': True,
-    #                 'invoice_state': invocie_is.state,
-    #                 'message': 'Hóa đơn đã tồn tại.'
-    #             }
-            
-    #         required_fields = [
-    #             'invoiceNumber', 'invoiceDate',
-    #             'sellerName', 'sellerAccount', 'sellerBank',
-    #             'amount', 'paymentUuid'
-    #         ]
-    #         for name in required_fields:
-    #             if not data.get(name):
-    #                 return {
-    #                      'status': False,
-    #                      'message': f'Trường [{name}] không có dữ liệu'  }
-           
-    #         invoice = request.env['invoice.report'].sudo().create({
-    #             'invoice_number': data.get('invoiceNumber'),
-    #             'invoice_date': data.get('invoiceDate'),
-    #             'pos_local': data.get('POSLocal') if data.get('POSLocal') else '',
-    #             'seller_name': data.get('sellerName'),
-    #             'seller_account': data.get('sellerAccount'),
-    #             'seller_bank_code': data.get('sellerBank'),
-    #             'amount': data.get('amount'),
-    #             'description': data.get('description') if data.get('description') else '',
-    #             'payment_uuid': data.get('paymentUuid'),
-    #             'account_id': acc['walletAccount'].id,
-    #             'wallet': _WALLET
-    #         })
-           
-    #         return {
-    #                 'status': True,
-    #                 'is_ivoice': True,
-    #                 'invoice_state': invoice.state,
-    #                 'message': 'Hóa đơn đã được ghi nhận.'
-    #             }
-    #     except Exception as e:
-    #         return {
-    #             'status': False,
-    #             'is_ivoice': False,
-    #             'invoice_state': 'error',
-    #             'message': f"Lỗi hệ thống: {str(e)}"
-    #         }
-        
-         
