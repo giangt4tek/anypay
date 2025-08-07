@@ -124,7 +124,7 @@ class InvoiceReport(models.Model):
                 results.append({
                     "invoice": rec.invoice_number,
                     "status": 'error',
-                    "message": error + 'sai chỗ này 1',
+                    "message": error,
                 })
             else:
                 status = response.get('result', {}).get('status')
@@ -133,7 +133,7 @@ class InvoiceReport(models.Model):
                 if status == 'Success':
                     # Gọi hàm _process_transaction từ controller xử lý giao dịch
                      # === 3. Gọi xử lý thanh toán ===
-                    _logger.info('---------------> thành công, bắt đầu xử lý giao dịch')
+                   
                     transfer_data = {
                         'acc_number': self.acc_number,
                         'wallet': self.wallet,
@@ -146,13 +146,13 @@ class InvoiceReport(models.Model):
                 
                    
                     process_result = self.env['transaction.handle']._process_transaction(transfer_data)
-                    _logger.info('---------------> kết quả xử lý giao dịch %s', process_result)
+                  
                     if process_result.get('status'):
                        rec.set_done(process_result.get('transactionUuid'))
                     results.append({
-                        "status": status,
+                        "status": process_result.get('status'),
                         "transactionUuid": process_result.get('transactionUuid'),
-                        "message": message + 'sai chỗ này 2',
+                        "message": process_result.get('message'),
                     })
                 elif status == 'notify':
                     transaction_id = response.get('result', {}).get('transaction_id')
@@ -165,13 +165,13 @@ class InvoiceReport(models.Model):
                             rec.set_done(transaction_id)
                             results.append({
                              "status": status,
-                             "message": message + 'sai chỗ này 3',
+                             "message": message,
                             })
                     else:
                         results.append({
                             "invoice": rec.invoice_number,
                             "status": 'error',
-                            "message": f"Không tìm thấy giao dịch thanh toán với ID {transaction_id} + 'sai chỗ này 4'",
+                            "message": f"Không tìm thấy giao dịch thanh toán với ID {transaction_id}",
                         })
                 else:
                     results.append({

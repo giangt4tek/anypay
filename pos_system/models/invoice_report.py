@@ -70,7 +70,7 @@ class InvoiceReport(models.Model):
            for rec in draft_invoices:
                 _logger.info('---------------> rec %s', rec)
                 result = rec.send_invoice()  # gọi hàm đã viết
-                results.extend(result)  # append kết quả của từng record
+                #results.extend(result)  # append kết quả của từng record
        
                 return results
         
