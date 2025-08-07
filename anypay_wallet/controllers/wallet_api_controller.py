@@ -282,11 +282,22 @@ class _Get_WalletApiController(http.Controller):
                    _logger.info(f"----------> Gọi xử lý thanh toán")
                     # Gọi hàm send_debt_paid để xử lý thanh toán
                    result = invoice_record.send_debt_paid()
+                   # Nếu là list thì lấy phần tử đầu tiên
+                   if isinstance(result, list) and result:
+                       result_data = result[0]
+                   else:
+                       result_data = {}
+                   
                    return {
-                        "status": 'Success',
-                        "transactionUuid": result.get('transactionUuid'),
-                        "message": 'Thanh toán thành công'
-                    }
+                       "status": result_data.get('status', 'error'),
+                       "transactionUuid": result_data.get('transactionUuid'),
+                       "message": result_data.get('message', 'Không rõ kết quả')
+                   }
+                #    return {
+                #         "status": 'Success',
+                #         "transactionUuid": result.get('transactionUuid'),
+                #         "message": 'Thanh toán thành công'
+                #     }
                 # transfer_data = {
                 #     'acc_number': buyer_info.get('buyerAccount'),
                 #     'wallet': buyer_info.get('buyerBank'),

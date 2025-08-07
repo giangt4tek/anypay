@@ -69,13 +69,13 @@ class InvoiceReport(models.Model):
            _logger.info('---------------> draft_invoices %s', draft_invoices)
            for rec in draft_invoices:
                 _logger.info('---------------> rec %s', rec)
-                result = rec.send_debt_paid()  # gọi hàm đã viết
+                result = rec.send_invoice()  # gọi hàm đã viết
                 results.extend(result)  # append kết quả của từng record
        
                 return results
         
   
-    def send_debt_paid(self):
+    def send_invoice(self):
         results = []
         _logger.info('---------------> 1')
         for rec in self.sudo():
