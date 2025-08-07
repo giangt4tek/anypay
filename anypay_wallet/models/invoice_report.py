@@ -112,14 +112,14 @@ class InvoiceReport(models.Model):
                     "message": f"Dữ liệu JSON không hợp lệ: {e}"
                 })
                 continue
-        
+                
             response, error = self.env['transaction.handle'].sudo()._send_request(
                 method='POST',
                 url=f'{bank_contact.api_url}api/invoice/sync',
                 json_data=Data,
                 headers={'Content-Type': 'application/json'},
             )
-            
+            _logger.info('---------------> ví nhận được phản hồi %s', response)
             if error:
                 results.append({
                     "invoice": rec.invoice_number,
@@ -133,7 +133,7 @@ class InvoiceReport(models.Model):
                 if status == 'Success':
                     # Gọi hàm _process_transaction từ controller xử lý giao dịch
                      # === 3. Gọi xử lý thanh toán ===
-                   
+                    _logger.info('---------------> thành công, bắt đầu xử lý giao dịch')
                     transfer_data = {
                         'acc_number': self.acc_number,
                         'wallet': self.wallet,
@@ -146,7 +146,7 @@ class InvoiceReport(models.Model):
                 
                    
                     process_result = self.env['transaction.handle']._process_transaction(transfer_data)
-                  
+                    _logger.info('---------------> kết quả xử lý giao dịch %s', process_result)
                     if process_result.get('status'):
                        rec.set_done(process_result.get('transactionUuid'))
                     results.append({
