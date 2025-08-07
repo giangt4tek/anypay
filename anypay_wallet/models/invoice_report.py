@@ -124,7 +124,7 @@ class InvoiceReport(models.Model):
                 results.append({
                     "invoice": rec.invoice_number,
                     "status": 'error',
-                    "message": error,
+                    "message": error + 'sai chỗ này 1',
                 })
             else:
                 status = response.get('result', {}).get('status')
@@ -152,7 +152,7 @@ class InvoiceReport(models.Model):
                     results.append({
                         "status": status,
                         "transactionUuid": process_result.get('transactionUuid'),
-                        "message": message,
+                        "message": message + 'sai chỗ này 2',
                     })
                 elif status == 'notify':
                     transaction_id = response.get('result', {}).get('transaction_id')
@@ -165,13 +165,13 @@ class InvoiceReport(models.Model):
                             rec.set_done(transaction_id)
                             results.append({
                              "status": status,
-                             "message": message,
+                             "message": message + 'sai chỗ này 3',
                             })
                     else:
                         results.append({
                             "invoice": rec.invoice_number,
                             "status": 'error',
-                            "message": f"Không tìm thấy giao dịch thanh toán với ID {transaction_id}",
+                            "message": f"Không tìm thấy giao dịch thanh toán với ID {transaction_id} + 'sai chỗ này 4'",
                         })
                 else:
                     results.append({
