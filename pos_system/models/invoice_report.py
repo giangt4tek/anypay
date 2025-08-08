@@ -65,6 +65,7 @@ class InvoiceReport(models.Model):
     def invoice_sync(self):
         results = []
         draft_invoices = self.sudo().search([('state', '=', 'draft')])
+        _logger.info(f"--------> Draft invoices to sync: {draft_invoices}")
         if draft_invoices:
            for rec in draft_invoices:
                 result = rec.send_invoice()  # gọi hàm đã viết
