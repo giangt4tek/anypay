@@ -263,7 +263,6 @@ class TransactionHandle(models.Model):
 
     def create_invoice(self, data):
         try:
-            
             acc = self.check_access_wallet(data['acc_number'], data['wallet'])
             if not acc['status']: 
                 acc['is_ivoice'] = False
@@ -284,7 +283,7 @@ class TransactionHandle(models.Model):
             
             required_fields = [
                 'invoiceNumber', 'invoiceDate',
-                'sellerName', 'sellerAccount', 'sellerBank',
+                'sellerAccount', 'sellerBank',
                 'amount', 'paymentUuid'
             ]
             for name in required_fields:
@@ -296,12 +295,12 @@ class TransactionHandle(models.Model):
             invoice = self.env['invoice.report'].sudo().create({
                 'invoice_number': data.get('invoiceNumber'),
                 'invoice_date': data.get('invoiceDate'),
-                'pos_local': data.get('POSLocal') if data.get('POSLocal') else '',
-                'seller_name': data.get('sellerName'),
+                'pos_local': data.get('POSLocal', ''),
+                'seller_name': data.get('sellerName', ''),
                 'seller_account': data.get('sellerAccount'),
                 'seller_bank_code': data.get('sellerBank'),
                 'amount': data.get('amount'),
-                'description': data.get('description') if data.get('description') else '',
+                'description': data.get('description', ''),
                 'payment_uuid': data.get('paymentUuid'),
                 'account_id': acc['walletAccount'].id,
                 'wallet': _WALLET

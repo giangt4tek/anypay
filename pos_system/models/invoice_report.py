@@ -65,12 +65,12 @@ class InvoiceReport(models.Model):
     def invoice_sync(self):
         results = []
         draft_invoices = self.sudo().search([('state', '=', 'draft')])
-        _logger.info(f"--------> Draft invoices to sync: {draft_invoices}")
+       
         if draft_invoices:
            for rec in draft_invoices:
                 result = rec.send_invoice()  # gọi hàm đã viết
                 results.extend(result)  # append kết quả của từng record
-        _logger.info(f"--------> Invoice sync results: {results}")
+       
         return results
         
   
@@ -107,7 +107,7 @@ class InvoiceReport(models.Model):
                 json_data=Data,
                 headers={'Content-Type': 'application/json'},
             )
-            _logger.info(f"--------> Response from API: {response}, Error: {error}")
+          
             if error:
                 results.append({
                     "invoice": rec.invoice_number,
@@ -159,7 +159,7 @@ class InvoiceReport(models.Model):
         self.ensure_one()
         buyer_data = {
             'buyerAccount': str(self.buyer_account or ''),
-            'buyerBank': str(self.buyer_wallet or ''),
+            'buyerWallet': str(self.buyer_wallet or ''),
         }
         return buyer_data
 

@@ -231,7 +231,7 @@ class _Get_WalletApiController(http.Controller):
 
             invoice_info = {
                 'acc_number': buyer_info.get('buyerAccount'),
-                'wallet': buyer_info.get('buyerBank'),
+                'wallet': buyer_info.get('buyerWallet'),
                 'invoiceNumber': data.get('invoiceNumber'),
                 'invoiceDate': data.get('invoiceDate'),
                 'POSLocal': data.get('POSLocal') or '',
