@@ -285,7 +285,7 @@ class _Get_WalletApiController(http.Controller):
                        result_data = {}
                    
                    return {
-                       "status": result_data.get('Success', 'Fail'),
+                       "status": result_data.get('status', 'error'),
                        "transactionUuid": result_data.get('transactionUuid'),
                        "message": result_data.get('message', 'Không rõ kết quả')
                    }
