@@ -205,7 +205,8 @@ class _Get_WalletApiController(http.Controller):
         pos_key = data.get('posKey', '')
         if pos_key:
             Data = {'posKey': pos_key}
-            response, error = self.env['transaction.handle'].sudo()._send_request(
+            
+            response, error = request.env['transaction.handle']._send_request(
                 method='POST',
                 url=f'https://tpos.t4tek.tk/pos/lookup',
                 json_data=Data,
