@@ -219,16 +219,16 @@ class InvoiceReport(models.Model):
 
     def action_show_invoice_report(self):
         domain = []
-    
+        _logger.info('---------------> user %s đang xem hóa đơn', self.env.user.partner_id)
         # Nếu không phải quản lý, thì chỉ xem hóa đơn có liên kết với chính partner của user
         if not self.env.user.has_group('anypay_wallet.manager_wallet'):
             domain = [('account_id.partner_id', '=', self.env.user.partner_id.id)]
-    
+
         return {
             'type': 'ir.actions.act_window',
             'name': 'Hóa đơn thanh toán',
             'res_model': 'invoice.report',
-            'view_mode': 'tree,form',
+            'view_mode': 'list,form',
             'domain': domain,
             'context': {
                 'search_default_filter_my_invoices': 1
