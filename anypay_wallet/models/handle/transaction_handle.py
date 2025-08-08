@@ -263,7 +263,19 @@ class TransactionHandle(models.Model):
 
     def create_invoice(self, data):
         try:
-            acc = self.check_access_wallet(data['acc_number'], data['wallet'])
+           
+            required_fields = [
+                'acc_number', 'invoiceNumber', 'invoiceDate',
+                'sellerAccount', 'sellerBank',
+                'amount', 'paymentUuid'
+            ]
+            for name in required_fields:
+                if not data.get(name):
+                    return {
+                         'status': False,
+                         'message': f'Trường [{name}] không có dữ liệu'  }
+                
+            acc = self.check_access_wallet(data['acc_number'], data.get('wallet', _WALLET))
             if not acc['status']: 
                 acc['is_ivoice'] = False
                 return acc
@@ -281,17 +293,6 @@ class TransactionHandle(models.Model):
                     'message': 'Hóa đơn đã tồn tại.'
                 }
             
-            required_fields = [
-                'invoiceNumber', 'invoiceDate',
-                'sellerAccount', 'sellerBank',
-                'amount', 'paymentUuid'
-            ]
-            for name in required_fields:
-                if not data.get(name):
-                    return {
-                         'status': False,
-                         'message': f'Trường [{name}] không có dữ liệu'  }
-           
             invoice = self.env['invoice.report'].sudo().create({
                 'invoice_number': data.get('invoiceNumber'),
                 'invoice_date': data.get('invoiceDate'),
