@@ -222,7 +222,7 @@ class InvoiceReport(models.Model):
         _logger.info('---------------> user %s đang xem hóa đơn', self.env.user.partner_id)
         # Nếu không phải quản lý, thì chỉ xem hóa đơn có liên kết với chính partner của user
         if not self.env.user.has_group('anypay_wallet.manager_wallet'):
-            domain = [('account_id.partner_id', '=', self.env.user.partner_id.id)]
+            domain = [('partner_id', '=', self.env.user.partner_id.id)]
 
         return {
             'type': 'ir.actions.act_window',
