@@ -8,6 +8,7 @@
                 <list string="Danh sách hóa đơn" default_order="payment_time desc" create="0">
                     <field name="invoice_number"/>
                     <field name="invoice_date"/>
+                    <field name="pos_local"/>
                     <field name="seller_name"/>
                     <field name="amount"/>
                     <!-- <field name="currency_id"/> -->

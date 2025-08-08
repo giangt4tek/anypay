@@ -40,6 +40,7 @@
           <field name="pos_name"/>
           <field name="pos_user"/>
           <field name="client_key"/>
+          <field name="secret_key"/>
           <field name="bank_code"/>
           <field name="bank_acc"/>
           <field name="is_active"/>

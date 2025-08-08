@@ -11,10 +11,11 @@ class InvoiceReport(models.Model):
     _description = 'Bill Payment Transaction'
 
     invoice_number = fields.Char(string='Mã hóa đơn', required=True)
-    invoice_date = fields.Datetime(string='Thời gian tạo hóa đơn', default=fields.Datetime.now)
+    invoice_date = fields.Datetime(string='Ngày hóa đơn', default=fields.Datetime.now)
     seller_name = fields.Char(string='Người Bán', required=True)
     seller_account = fields.Char(string='Tài khoản Seller', required=True)
     seller_bank_code = fields.Char(string='Ngân hàng Seller', required=True)
+    pos_key = fields.Char(string='Mã POS')
     pos_local = fields.Char(string='Điểm bán')
     wallet = fields.Char(string='Ví điện tử', store=True, readonly=True)
     account_id = fields.Many2one('t4tek.wallet.account', string='Chủ tài khoản', help="Chủ tài khoản giao dịch")
@@ -78,12 +79,12 @@ class InvoiceReport(models.Model):
         draft_invoices = self.sudo().search([('state', '=', 'draft')])
         if draft_invoices:
            for rec in draft_invoices:
-             
                 result = rec.send_debt_paid()  # gọi hàm đã viết
                 results.extend(result)  # append kết quả của từng record
        
            return results
-        
+    
+    
     def send_debt_paid(self):
         results = []
 

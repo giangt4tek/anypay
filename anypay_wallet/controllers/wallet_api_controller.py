@@ -201,7 +201,34 @@ class _Get_WalletApiController(http.Controller):
     def create_invoice_debit(self, **post):
         raw_body = request.httprequest.get_data(as_text=True)
         data = json.loads(raw_body)
-     
+
+        pos_key = data.get('posKey', '')
+        if pos_key:
+            Data = {
+                'invoiceNumber': data.get('invoiceNumber', ''),
+                'posKey': pos_key,
+                'paymentUuid': data.get('paymentUuid', '')
+            }
+            response, error = self.env['transaction.handle'].sudo()._send_request(
+                method='POST',
+                url=f'https://tpos.t4tek.tk/pos/lookup',
+                json_data=Data,
+                headers={'Content-Type': 'application/json'},
+            )
+            if error:
+                return {
+                    'status': 'error',
+                    'message': error,
+                }
+            status = response.get('result', {}).get('status')
+            if status  == True:
+               POS = response.get('result', {}).get('pos')
+               data['sellerBank'] = POS.get('bank_code', '')
+               data['sellerAccount'] = POS.get('bank_acc', '')  
+               data['sellerName'] = POS.get('pos_user', '')
+               data['POSLocal'] = POS.get('pos_name', '')
+
+
         invCreate = request.env["transaction.handle"].create_invoice(data)    
         if invCreate['status']: 
             return {

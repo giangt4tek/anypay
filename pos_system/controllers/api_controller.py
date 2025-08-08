@@ -150,7 +150,7 @@ class _Get_BankApiController(http.Controller):
                 content_type='application/json')
  
       
-    @http.route('/api/invoice/sync', type='json', auth='none', methods=["POST"], csrf=False)
+    @http.route('/pos/invoice/sync', type='json', auth='none', methods=["POST"], csrf=False)
     def create_invoice_sync(self, **post):
         
         auth_header = request.httprequest.headers.get('Authorization')
@@ -194,7 +194,45 @@ class _Get_BankApiController(http.Controller):
                     'Fail': invCreate['message']
                 }   
         
-   
+    @http.route('/pos/lookup', type='json', auth='none', methods=["POST"], csrf=False)
+    def pos_lookup(self, **post):
+        
+        raw_body = request.httprequest.get_data(as_text=True)
+        data = json.loads(raw_body)
+        required_fields = [
+                'invoiceNumber', 'paymentUuid', 'pos_key'
+            ]
+        for name in required_fields:
+                if not data.get(name):
+                   return {
+                         'status': False,
+                         'message': f'Trường [{name}] không có dữ liệu'  }
+        
+        POS = request.env['pos.category'].sudo().search([
+            ('secret_key', '=', data['pos_key'])
+        ], limit=1)
+
+        if POS:
+            return {
+                'status': True,
+                'pos': {
+                    'posName': POS.pos_name,
+                    'posUser': POS.pos_user,
+                    'bankCode': POS.bank_code,
+                    'bankAcc': POS.bank_acc,
+                },
+                'message': 'Tìm thấy thành công POS.'
+            }
+        else:
+            return {
+                'status': False,
+                'message': 'Không có POS này trong hệ thống.'
+            }
+        
+       
+        
+        
+            
 # -------------------------------------- Initialization Handl -------------------------------------------
 
     def create_invoice(self, data):
