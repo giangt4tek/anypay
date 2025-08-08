@@ -69,6 +69,7 @@ class InvoiceReport(models.Model):
            for rec in draft_invoices:
                 result = rec.send_invoice()  # gọi hàm đã viết
                 results.extend(result)  # append kết quả của từng record
+        _logger.info(f"--------> Invoice sync results: {results}")
         return results
         
   
