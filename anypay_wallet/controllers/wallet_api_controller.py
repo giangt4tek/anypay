@@ -284,8 +284,11 @@ class _Get_WalletApiController(http.Controller):
                    else:
                        result_data = {}
                    
+                   raw_status = result_data.get('status', False)
+                   status_str = 'Success' if raw_status is True else ('notify' if raw_status == 'notify' else 'error')
+
                    return {
-                       "status": result_data.get('status', 'error'),
+                       "status": status_str,
                        "transactionUuid": result_data.get('transactionUuid'),
                        "message": result_data.get('message', 'Không rõ kết quả')
                    }
