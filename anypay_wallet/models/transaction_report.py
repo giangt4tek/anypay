@@ -8,7 +8,18 @@ class TransactionReport(models.Model):
 
     name = fields.Char(string='Transaction Reference', required=True, copy=False, readonly=True, default=lambda self: ('New'))
     
-    account_id = fields.Many2one('t4tek.wallet.account', string='Chủ tài khoản', help="Chủ tài khoản giao dịch")
+    account_id = fields.Many2one('t4tek.wallet.account', help="Chủ tài khoản giao dịch")
+    acc_number = fields.Char(
+                 string='Chủ tài khoản',
+                 related='account_id.acc_number',
+                 store=True,
+                 readonly=True)
+    partner_id = fields.Many2one(
+                'res.partner',
+                string="Tên chủ khoản",
+                related='account_id.partner_id',
+                store=False,  # optional: lưu vào DB nếu cần tìm kiếm/sắp xếp
+                readonly=True)
     wallet = fields.Char(string='Ví AnyPay', required=True)
     
     transfer_acc_number = fields.Char(string='TK nhận/chuyển khoản', help="Tài khoản nhận tiền hoặc chuyển tiền")
