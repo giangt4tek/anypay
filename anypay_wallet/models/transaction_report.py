@@ -59,7 +59,8 @@ class TransactionReport(models.Model):
             else:
                 rec.signed_monney = rec.monney
        
-   
+    
+    
     
     # partner_id = fields.Many2one(
     # 'res.partner',

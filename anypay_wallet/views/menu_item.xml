@@ -60,6 +60,7 @@
         <menuitem id="menu_transaction_report" name="Hóa đơn giao dịch" 
                   parent="menu_invoice_report_root" 
                   action="action_transaction_report" 
+                  groups="manager_wallet"
                   sequence="2" />
         
         <!-- <menuitem id="menu_transaction_report"
