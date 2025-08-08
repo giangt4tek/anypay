@@ -220,10 +220,10 @@ class _Get_WalletApiController(http.Controller):
             status = response.get('result', {}).get('status')
             if status  == True:
                POS = response.get('result', {}).get('pos')
-               data['sellerBank'] = POS.get('bank_code', '')
-               data['sellerAccount'] = POS.get('bank_acc', '')  
-               data['sellerName'] = POS.get('pos_user', '')
-               data['POSLocal'] = POS.get('pos_name', '')
+               data['sellerBank'] = POS.get('bankCode', '')
+               data['sellerAccount'] = POS.get('bankAcc', '')  
+               data['sellerName'] = POS.get('posUser', '')
+               data['POSLocal'] = POS.get('posName', '')
             else:
                 return {
                     'status': 'error',
