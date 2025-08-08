@@ -204,11 +204,7 @@ class _Get_WalletApiController(http.Controller):
 
         pos_key = data.get('posKey', '')
         if pos_key:
-            Data = {
-                'invoiceNumber': data.get('invoiceNumber', ''),
-                'posKey': pos_key,
-                'paymentUuid': data.get('paymentUuid', '')
-            }
+            Data = {'posKey': pos_key}
             response, error = self.env['transaction.handle'].sudo()._send_request(
                 method='POST',
                 url=f'https://tpos.t4tek.tk/pos/lookup',
@@ -227,6 +223,11 @@ class _Get_WalletApiController(http.Controller):
                data['sellerAccount'] = POS.get('bank_acc', '')  
                data['sellerName'] = POS.get('pos_user', '')
                data['POSLocal'] = POS.get('pos_name', '')
+            else:
+                return {
+                    'status': 'error',
+                    'message': 'Không tìm thấy POS với Key đã cung cấp.'
+                }
 
 
         invCreate = request.env["transaction.handle"].create_invoice(data)    

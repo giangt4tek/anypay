@@ -199,9 +199,7 @@ class _Get_BankApiController(http.Controller):
         
         raw_body = request.httprequest.get_data(as_text=True)
         data = json.loads(raw_body)
-        required_fields = [
-                'invoiceNumber', 'paymentUuid', 'pos_key'
-            ]
+        required_fields = ['posKey']
         for name in required_fields:
                 if not data.get(name):
                    return {
@@ -209,7 +207,7 @@ class _Get_BankApiController(http.Controller):
                          'message': f'Trường [{name}] không có dữ liệu'  }
         
         POS = request.env['pos.category'].sudo().search([
-            ('secret_key', '=', data['pos_key'])
+            ('secret_key', '=', data['posKey'])
         ], limit=1)
 
         if POS:
