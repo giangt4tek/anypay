@@ -215,3 +215,21 @@ class InvoiceReport(models.Model):
             'buyerBank': str(self.wallet or ''),
         }
         return seller_data
+    
+
+    def action_show_invoice_report(self):
+        domain = []
+
+        if not self.env.user.has_group('anypay_wallet.manager_wallet'):
+            domain = [('account_id.user_id', '=', self.env.user.id)]
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': 'Hóa đơn thanh toán',
+            'res_model': 'invoice.report',
+            'view_mode': 'tree,form',
+            'domain': domain,
+            'context': {
+                'search_default_filter_my_invoices': 1  # nếu cần lọc theo bộ lọc smart
+            },
+        }
