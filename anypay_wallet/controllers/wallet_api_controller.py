@@ -202,7 +202,6 @@ class _Get_WalletApiController(http.Controller):
         raw_body = request.httprequest.get_data(as_text=True)
         data = json.loads(raw_body)
      
-        _logger.info(f"----------> Received data: {data}")
         invCreate = request.env["transaction.handle"].create_invoice(data)    
         if invCreate['status']: 
             return {
@@ -221,7 +220,6 @@ class _Get_WalletApiController(http.Controller):
         try:
             raw_body = request.httprequest.get_data(as_text=True)
             data = json.loads(raw_body)
-            _logger.info(f"----------> Nhận HĐ")
             # === 1. Tách dữ liệu ===
             buyer_info = data['buyer'] if isinstance(data.get('buyer'), dict) else None
             seller_info = data['seller'] if isinstance(data.get('seller'), dict) else None
@@ -245,7 +243,6 @@ class _Get_WalletApiController(http.Controller):
                 'sellerBank': seller_info.get('sellerBank'),
             }
 
-            _logger.info(f"----------> Tạo HĐ")
             # === 2. Ghi nhận hóa đơn ===
             
             invCreate = request.env["transaction.handle"].create_invoice(invoice_info)
@@ -279,7 +276,6 @@ class _Get_WalletApiController(http.Controller):
                     ], limit=1)
                 
                 if invoice_record: 
-                   _logger.info(f"----------> Gọi xử lý thanh toán")
                     # Gọi hàm send_debt_paid để xử lý thanh toán
                    result = invoice_record.send_debt_paid()
                    # Nếu là list thì lấy phần tử đầu tiên

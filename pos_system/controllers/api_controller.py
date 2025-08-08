@@ -199,12 +199,11 @@ class _Get_BankApiController(http.Controller):
 
     def create_invoice(self, data):
         try:
-            _logger.info("Bắt đầu tạo hóa đơn với dữ liệu: %s", data)
             invocie_is = request.env['invoice.report'].sudo().search([
                 ('invoice_number', '=', data['invoiceNumber']),
                  ('pos_id', '=', data['pos'].id),
                  ('payment_uuid', '=', data['paymentUuid'])], limit=1)
-            _logger.info("Kiểm tra hóa đơn đã tồn tại: %s", invocie_is)
+          
             if invocie_is:
                 return {
                     'status': False,
@@ -213,7 +212,6 @@ class _Get_BankApiController(http.Controller):
                     'message': 'Hóa đơn đã tồn tại.'
                 }
           
-            _logger.info("Tạo hóa đơn mới với dữ liệu: %s", data)
             # Tạo hóa đơn mới
             invoice = request.env['invoice.report'].sudo().create({
                 'invoice_number': data['invoiceNumber'],

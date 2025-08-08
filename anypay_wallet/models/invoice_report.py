@@ -119,7 +119,6 @@ class InvoiceReport(models.Model):
                 json_data=Data,
                 headers={'Content-Type': 'application/json'},
             )
-            _logger.info('---------------> ví nhận được phản hồi %s', response)
             if error:
                 results.append({
                     "invoice": rec.invoice_number,

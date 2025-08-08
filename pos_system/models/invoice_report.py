@@ -66,22 +66,19 @@ class InvoiceReport(models.Model):
         results = []
         draft_invoices = self.sudo().search([('state', '=', 'draft')])
         if draft_invoices:
-           _logger.info('---------------> draft_invoices %s', draft_invoices)
            for rec in draft_invoices:
-                _logger.info('---------------> rec %s', rec)
                 result = rec.send_invoice()  # gọi hàm đã viết
-                #results.extend(result)  # append kết quả của từng record
-       
-                return results
+                results.extend(result)  # append kết quả của từng record
+        return results
         
   
     def send_invoice(self):
         results = []
-        _logger.info('---------------> 1')
+        
         for rec in self.sudo():
             wallet_contact = self.env['wallet.contact'].sudo().search([
                 ('wallet_code', '=', rec.buyer_wallet)], limit=1)
-            _logger.info('---------------> wallet %s', wallet_contact)
+          
             if not wallet_contact or not wallet_contact.api_url:
                 results.append({
                     "invoice": rec.invoice_number,
@@ -89,9 +86,9 @@ class InvoiceReport(models.Model):
                     "message": f"Không có URL API của ngân hàng [{rec.buyer_wallet}]"
                 })
                 continue
-            _logger.info('---------------> 3')
+         
             Data = rec._add_general_invoice_information()
-            _logger.info('---------------> data %s', Data)
+          
             try:
                 json.dumps(Data)
             except TypeError as e:
@@ -101,14 +98,14 @@ class InvoiceReport(models.Model):
                     "message": f"Dữ liệu JSON không hợp lệ: {e}"
                 })
                 continue
-            _logger.info('---------------> send to [{wallet_contact}]')
+          
             response, error = _send_request(
                 method='POST',
                 url=f'{wallet_contact.api_url}api/invoice/payment',
                 json_data=Data,
                 headers={'Content-Type': 'application/json'},
             )
-            _logger.info('-------------> reponse %s', response)
+         
             if error:
                 results.append({
                     "invoice": rec.invoice_number,
