@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_account_move_send_wizard_inherit_l10n_vn_edi" model="ir.ui.view">
+            <field name="name">account.move.send.wizard.inherit.l10n_vn_edi</field>
+            <field name="model">account.move.send.wizard</field>
+            <field name="inherit_id" ref="account.account_move_send_wizard_form"/>
+            <field name="arch" type="xml">
+
+                <xpath expr="//footer" position="before">
+                    <div class="oe_clear">
+                        <group string="Hình thức gửi HĐĐT">
+                            <field name="l10n_vn_edi_send_option"
+                                   placeholder="Chọn kiểu gửi"/>
+                        </group>
+                    </div>
+                </xpath>
+
+            </field>
+        </record>
+    </data>
+</odoo>
