@@ -244,6 +244,7 @@ class _Get_BankApiController(http.Controller):
                 'buyerName': buyer_info.get('buyerName'),
                 'buyerAccount': buyer_info.get('buyerAccount'),
                 'buyerBank': buyer_info.get('buyerBank'),
+                
             }
 
             

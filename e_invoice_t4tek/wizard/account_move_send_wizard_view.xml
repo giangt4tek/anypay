@@ -10,7 +10,7 @@
                 <xpath expr="//footer" position="before">
                     <div class="oe_clear">
                         <group string="Hình thức gửi HĐĐT">
-                            <field name="l10n_vn_edi_send_option"
+                            <field name="release_option"
                                    placeholder="Chọn kiểu gửi"/>
                         </group>
                     </div>

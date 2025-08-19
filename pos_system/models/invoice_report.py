@@ -23,9 +23,10 @@ class InvoiceReport(models.Model):
 
     description = fields.Text(string='Nội dung thanh toán')
 
-    payment_time = fields.Datetime(string='Thời gian thanh toán')
+    #payment_time = fields.Datetime(string='Thời gian thanh toán')
     transaction_id = fields.Char(string='Mã giao dịch hệ thống', readonly=True, copy=False)
-    payment_uuid = fields.Char(string='ID thanh toán', required=True)
+    #payment_uuid = fields.Char(string='ID thanh toán', required=True)
+    pos_provide = fields.Char(string='POS cung cấp', required=True)
     state = fields.Selection([
         ('draft', 'Khởi tạo'),
         ('done', 'Hoàn tất'),
@@ -147,7 +148,7 @@ class InvoiceReport(models.Model):
             'POSLocal': str(self.pos_id.pos_name or ''),
             'amount': float(self.amount or 0.0),
             'description': str(self.description or ''),
-            'paymentUuid': str(self.payment_uuid or ''),
+            # 'paymentUuid': str(self.payment_uuid or ''),
             'buyer': self._add_buyer_information(),
             'seller': self._add_seller_information(),
             

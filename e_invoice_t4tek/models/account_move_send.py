@@ -39,9 +39,11 @@ class AccountMoveSend(models.AbstractModel):
             + move.l10n_vn_edi_e_invoice_pdf_file_id
         )
 
-    def _get_placeholder_mail_attachments_data(self, move, extra_edis=None):
+    def _get_placeholder_mail_attachments_data(self, move, invoice_edi_format=None, extra_edis=None):
         # EXTENDS 'account'
-        results = super()._get_placeholder_mail_attachments_data(move, extra_edis=extra_edis)
+        results = super()._get_placeholder_mail_attachments_data(move, 
+                                                                 invoice_edi_format=invoice_edi_format, 
+                                                                 extra_edis=extra_edis)
         
         partner_edi_format = self._get_default_invoice_edi_format(move)
         if partner_edi_format == 'vn_e_invoice' and move._l10n_vn_edi_get_credentials_company():
@@ -77,7 +79,6 @@ class AccountMoveSend(models.AbstractModel):
             errors = invoice._l10n_vn_edi_check_invoice_configuration()
          
             if not errors:
-             
                 json_data = invoice._l10n_vn_edi_generate_invoice_json()
                 invoice_data['e_invoice_attachments'] = [{
                     'name': f'{invoice.name.replace("/", "_")}_e_invoice.json',
@@ -141,9 +142,8 @@ class AccountMoveSend(models.AbstractModel):
         # EXTENDS 'account'
         super()._call_web_service_after_invoice_pdf_render(invoices_data)
         
-        for invoice, invoice_data in invoices_data.items():
-           _logger.info('-------------> invoice_data: %s', invoice_data)
-           _logger.info('-------------> invoice: %s', invoice)
+        #for invoice, invoice_data in invoices_data.items():
+          
     #         # Handle the json file, and create it if it does not yet exist. This can be done without sending to the EDI.
     #         json_file_data = [file for file in invoice_data.get('e_invoice_attachments', []) if file['mimetype'] == 'application/json']
     #         # json_pdf_data = invoice_data.get("pdf_attachment_values")

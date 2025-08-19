@@ -1,7 +1,9 @@
 import base64
 import io
+import json
 import re
 import time
+import json
 import uuid
 import zipfile
 from datetime import datetime, timedelta
@@ -80,6 +82,9 @@ class AccountMove(models.Model):
         store=True,
         readonly=False,
     )
+
+    release_is = fields.Boolean(string='Phát hành',)
+    sign_is = fields.Boolean(string='Ký phát hành',)
     # This id is important when sending by batches in order to recognize individual invoices.
     l10n_vn_edi_invoice_transaction_id = fields.Char(
         string='e_invoice Transaction ID',
@@ -168,7 +173,8 @@ class AccountMove(models.Model):
         string='Adjustment type',
         selection=[
             ('1', 'Money adjustment'),
-            ('2', 'Information adjustment'),
+            ('2', 'Quantity adjustment'),
+            ('3', 'Information adjustment'),
         ],
         copy=False,
     )
@@ -187,6 +193,17 @@ class AccountMove(models.Model):
         export_string_translation=False,
     )
 
+    status_invoice = fields.Selection(
+        string='Loại Hóa Đơn',
+        selection=[
+            ('0', 'Nháp'),
+            ('1', 'Phát hành'),
+            ('2', 'Thay thế'),
+            ('3', 'Điều chỉnh'),
+            ('4', 'Bị thay thế'),
+            ('5', 'Bị điều chỉnh')
+        ], copy=False,
+    )
     @api.depends('l10n_vn_edi_invoice_state')
     def _compute_show_reset_to_draft_button(self):
         # EXTEND 'account'
@@ -206,7 +223,7 @@ class AccountMove(models.Model):
         But this shouldn't be an issue since the logic to send the update will check if anything need to change.
         """
         for invoice in self:
-            if invoice.country_code == 'VN' and invoice.l10n_vn_edi_invoice_state == 'send':
+            if invoice.country_code == 'VN' and invoice.l10n_vn_edi_invoice_state == 'sent':
                 invoice.l10n_vn_edi_invoice_state = 'payment_state_to_update'
             else:
                 invoice.l10n_vn_edi_invoice_state = invoice.l10n_vn_edi_invoice_state
@@ -297,16 +314,17 @@ class AccountMove(models.Model):
         Query e_invoice in order to fetch the data representation of the invoice, either zip or pdf.
         """
         self.ensure_one()
+       
         if not self._l10n_vn_edi_is_sent():
             return {}, _("In order to download the invoice's PDF file, you must first send it to e_invoice")
-
+      
         # == Lock ==
         self.env['res.company']._with_locked_records(self)
 
         token_type, access_token, error = self._l10n_vn_edi_get_access_token(scope_type='invoice-lookup')
         if error:
             return {}, error
-        
+       
         return _l10n_vn_edi_send_request(
             method='POST',
             url=f'{e_invoice_API_URL}api/invoice/lookup',
@@ -351,7 +369,7 @@ class AccountMove(models.Model):
         """
         self.ensure_one()
         files_data, error_message = self._l10n_vn_edi_fetch_invoice_file_data('PDF')
-        
+      
         if error_message:
             return files_data, error_message
         file_name = "invoice.pdf"
@@ -430,7 +448,7 @@ class AccountMove(models.Model):
                 raise UserError(error_message)
 
             # Revert back to the sent state as the status is up-to-date.
-            invoice.l10n_vn_edi_invoice_state = 'send'
+            invoice.l10n_vn_edi_invoice_state = 'sent'
 
             if self._can_commit():
                 self._cr.commit()
@@ -519,7 +537,7 @@ class AccountMove(models.Model):
         
             if error:
                 return [error]
-          
+           
             request_response, error_message = _l10n_vn_edi_send_request(
                 method='POST',
                 url=f'{e_invoice_API_URL}api/invoice/create',
@@ -534,12 +552,17 @@ class AccountMove(models.Model):
             message = request_response['message']
 
         if status == 200:
+            # If the status is 200, we assume that the invoice was sent successfully.
             self.write({
                 'invoice_id_attr': request_response['id_attr'],
                 'invoice_lookup_code': request_response['lookup_code'],
-                'l10n_vn_edi_invoice_state': 'send',
+                'l10n_vn_edi_invoice_state': 'sent',
             })
-            
+
+            if 'autoSign' in request_response:
+               if request_response['autoSign'] == 200:
+                  self.sign_is: True
+
         else:
             # If the status is not 200, we assume that the invoice was not sent successfully.
             # We can still store the error message in the chatter.
@@ -549,35 +572,38 @@ class AccountMove(models.Model):
         if self._can_commit():
             self._cr.commit()
        
-
+    # -------------------------> HỦY HÓA ĐƠN (Không sử dụng) <---------------------------------
     def _l10n_vn_edi_cancel_invoice(self, reason, agreement_document_name, agreement_document_date):
         """ Send a request to cancel the invoice. """
         self.ensure_one()
-
+        raise UserError('không được hủy hóa đơn. Chỉ thay thế hoặc điều chỉnh')
         # == Lock ==
         self.env['res.company']._with_locked_records(self)
-
+        _logger.info('--------------> 1')
         # If no error raised, we try to cancel it on the EDI.
         token_type, access_token, error = self._l10n_vn_edi_get_access_token(scope_type='cancel-invoice')
         if error:
             raise UserError(error)
-        _logger.info('-------------> xóa inovice có id_attr: %s', self.invoice_id_attr)
+        
+        Data ={
+                'id_attr': self.invoice_id_attr,
+                'reason': reason,
+                'date_cancel': agreement_document_date.strftime('%Y-%m-%d'),
+                'send': 0,
+                'cus_name':self.partner_id.name,
+                'cus_email': self.commercial_partner_id.email or '',
+                'type': 'HDGTGT',
+            }
+        _logger.info('--------------> Data %s',Data)
         _request_response, error_message = _l10n_vn_edi_send_request(
             method='POST',
             url=f'{e_invoice_API_URL}api/invoice/cancel',
-            json_data={
-                'id_attr': self.invoice_id_attr,
-                'reason': reason,
-                'date_cancel': self.l10n_vn_edi_issue_date.strftime('%Y-%m-%d'),
-                'send': 0,
-                'cus_name':'',
-                'cus_email': '',
-                'type': 'HDGTGT',
-            },
+            json_data=Data,
             headers={'authorization':f"{token_type} {access_token}",
                      'Content-Type': 'application/json'},
         )
-        _logger.info('-------------> response cancel: %s', _request_response)
+        _logger.info('--------------> respone: %s', _request_response)
+        _logger.info('--------------> error: %s', error_message)
         if error_message:
             raise UserError(error_message)
 
@@ -600,7 +626,7 @@ class AccountMove(models.Model):
 
         if self._can_commit():
             self._cr.commit()
-
+    #---------------------------
     def button_draft(self):
         # EXTEND account
         # When going from canceled => draft, we ensure to clear the edi fields so that the invoice can be resent if required.
@@ -627,30 +653,50 @@ class AccountMove(models.Model):
         self.ensure_one()
         # This MUST match chronologically with the sequence they generate on their system, which is why it is set to now.
         self.l10n_vn_edi_issue_date = fields.Datetime.now()
-        # json_values = {}
-        # self._l10n_vn_edi_add_general_invoice_information(json_values)
+        json_values = {}
+        #self._l10n_vn_edi_add_general_invoice_information(json_values)
         #self._l10n_vn_edi_add_buyer_information(json_values)
         #self._l10n_vn_edi_add_seller_information(json_values)
         #self._l10n_vn_edi_add_payment_information(json_values)
         #self._l10n_vn_edi_add_item_information(json_values)
         #self._l10n_vn_edi_add_tax_breakdowns(json_values)
-        json_values = self._add_general_invoice_information()
+        self._add_general_invoice_information(json_values)
         return json_values
     
     # region Create Invoice Information
-    def _add_general_invoice_information(self):
+    def _add_general_invoice_information(self, json_values):
         """ General invoice information, such as the model number, invoice symbol, type, date of issues, ... """
         self.ensure_one()
-
+        send_release = self.env.context.get('send_release')
         invoice_type = self.l10n_vn_edi_invoice_symbol.invoice_template_id.template_invoice_type
         invoice_name = dict(self.env['e_invoice_t4tek.e_invoice.template']._fields['template_invoice_type'].selection).get(invoice_type)
         action = ['create', 'update', 'replace', 'adjust']
-      
+        adjustment_origin_invoice = None
+        reference_id = ''
+        if self.move_type == 'out_refund':  # Credit note are used to adjust an existing invoice
+            adjustment_origin_invoice = self.reversed_entry_id
+        elif self.l10n_vn_edi_replacement_origin_id:  # 'Reverse and create invoice' is used to issue a replacement invoice
+            adjustment_origin_invoice = self.l10n_vn_edi_replacement_origin_id
+            reference_id = reference_id = adjustment_origin_invoice.invoice_id_attr
+
+        _logger.info(f'-------------------->reference_id: %s', reference_id)
+        _logger.info(f'-------------------->action: %s',  action[2] if adjustment_origin_invoice else action[0])
+        # if adjustment_origin_invoice:
+        #     invoice_data.update({
+        #         'adjustmentType': '5' if self.move_type == 'out_refund' else '3',  # Adjustment or replacement
+        #         'adjustmentInvoiceType': self.l10n_vn_edi_adjustment_type or '',
+        #         'originalInvoiceId': adjustment_origin_invoice.l10n_vn_edi_invoice_number,
+        #         'originalInvoiceIssueDate': self._l10n_vn_edi_format_date(adjustment_origin_invoice.l10n_vn_edi_issue_date),
+        #         'originalTemplateCode': adjustment_origin_invoice.l10n_vn_edi_invoice_symbol.invoice_template_id.name,
+        #         'additionalReferenceDesc': self.l10n_vn_edi_agreement_document_name,
+        #         'additionalReferenceDate': self._l10n_vn_edi_format_date(self.l10n_vn_edi_agreement_document_date),
+        #     })
+        if adjustment_origin_invoice: action[2]
         invoice_data = {
             'init_invoice': invoice_type,
-            'action': action[0],
+            'action': action[2] if adjustment_origin_invoice else action[0] ,
             'id_attr': '',
-            'reference_id': '',
+            'reference_id': reference_id,
             'id_partner': '',
             'invoice_type': '',
             'name': invoice_name,
@@ -669,11 +715,12 @@ class AccountMove(models.Model):
             'payment_type' : 1,
             **self._add_buyer_information(),
             'detail' : self._add_item_information(),
-            'autoSign': 0,
+            'autoSign': send_release if send_release else 0,
             'returnXml' : 0,
-            
         }
-        return invoice_data
+
+        
+        json_values.update(invoice_data)
     
     def _add_buyer_information(self):
         """ Create and return the buyer information for the current invoice. """
@@ -690,6 +737,9 @@ class AccountMove(models.Model):
             'cus_address' : self._get_address_inline(),
             'cus_phone' : commercial_partner_phone or '',
             'cus_email' : self.commercial_partner_id.email or '',
+            'cus_budget_code': self.partner_id.vn_budget_code or '',
+            'cus_citizen_identity' : self.partner_id.vn_citizen_identity or "",
+            'cus_passport' : self.partner_id.edi_passport or "",
             'cus_email_cc' : "",
         }
 
@@ -709,7 +759,8 @@ class AccountMove(models.Model):
             'product': 1,
             'line_note': 2,
             'discount': 3,
-            'note': 4 }
+            'note': 4,
+            'featured': 5,}
 
         for idx, line in enumerate(product_lines, start=1):
             # For credit notes amount, we send negative values (reduces the amount of the original invoice)
@@ -722,15 +773,45 @@ class AccountMove(models.Model):
                 'unit': line.product_uom_id.name,
                 'quantity': line.quantity,
                 'price': line.price_unit * sign,
-                'total': line.price_total * sign,
+                'total': line.price_subtotal * sign,
                 'discount': line.discount or 0.0,
                 'discountAmount': (line.price_total - line.price_subtotal) * sign,
+                'vatRate': line.tax_ids and line.tax_ids[0].amount or -2,
+                'vatAmount': (line.price_total - line.price_subtotal) * sign,
+                'amount': line.price_total * sign,
                 'feature': code_map.get(line.display_type, 1),  # Default to product if not found
+                'featureDetail': json.loads(self.feature_detail()) if code_map == 5 else []
             }
             items_information.append(item_information)
     
         return items_information
     
+    def feature_detail(self):
+        featureType = {
+            '1': 'Hàng hóa là xe ô tô, xe mô tô',
+            '2': 'Dịch vụ vận chuyển',
+            '3': 'Dịch vụ vận chuyển trên nền tảng số, TMĐT',
+        }
+
+        result = []
+        feature_code = getattr(self, 'feature', None)  # Lấy từ field feature của model
+
+        # Luôn có featureType
+        result.append({'featureType': featureType.get(feature_code, '')})
+
+        # Thêm các trường tùy loại feature
+        if feature_code == '1':
+            result.append({'chassisNumber': ''})
+            result.append({'engineNumber': ''})
+        elif feature_code == '2':
+            result.append({'vehiclePlateNumber': ''})
+        elif feature_code == '3':
+            result.append({'senderName': ''})
+            result.append({'senderAddress': ''})
+            result.append({'senderTaxCode': ''})
+
+        return json.dumps(result, ensure_ascii=False)
+
     def _get_valid_vat(self):
         raw_vat = (self.commercial_partner_id.vat or "").strip()
         # Kiểm tra MST chính: đúng 10 số
@@ -754,6 +835,7 @@ class AccountMove(models.Model):
     def _l10n_vn_edi_add_general_invoice_information(self, json_values):
         """ General invoice information, such as the model number, invoice symbol, type, date of issues, ... """
         self.ensure_one()
+       
         # Khai báo này dành cho HDDT Viettel --- GX
         invoice_data = {
             'transactionUuid': str(uuid.uuid4()),
@@ -779,7 +861,7 @@ class AccountMove(models.Model):
                 company=self.company_id,
                 date=self.invoice_date or self.date,
             )
-
+        
         adjustment_origin_invoice = None
         if self.move_type == 'out_refund':  # Credit note are used to adjust an existing invoice
             adjustment_origin_invoice = self.reversed_entry_id
@@ -864,35 +946,36 @@ class AccountMove(models.Model):
     def _l10n_vn_edi_lookup_invoice(self):
         """ Lookup on invoice, returning its current details on e_invoice. """
         self.ensure_one()
-        type_token, access_token, error = self._l10n_vn_edi_get_access_token(scope_type='invoice-lookup')
+        token_type, access_token, error = self._l10n_vn_edi_get_access_token(scope_type='invoice-lookup')
+       
         if error:
             return {}, error
 
         invoice_data, error_message = _l10n_vn_edi_send_request(
             method='POST',
-            url=f'{e_invoice_API_URL}InvoiceAPI/InvoiceWS/searchInvoiceByTransactionUuid',
-            params={
-                'supplierTaxCode': self.company_id.vat,
-                'transactionUuid': self.l10n_vn_edi_invoice_transaction_id,
+            url=f'{e_invoice_API_URL}api/invoice/lookup',
+            json_data={
+                'matracuu': self.invoice_lookup_code,
+                'conversion': 0  
             },
-            headers={
-                'Content-Type': 'application/x-www-form-urlencoded;',
-            },
-            cookies={'access_token': access_token},
+            headers={'authorization':f"{token_type} {access_token}",
+                     'Content-Type': 'application/json'},
         )
+
         return invoice_data, error_message
 
     def _l10n_vn_edi_get_access_token(self, scope_type):
         """ Return an access token to be used to contact the API. Either take a valid stored one or get a new one. """
-
         self.ensure_one()
         credentials_company = self._l10n_vn_edi_get_credentials_company()
+      
         # First, check if we have a token stored and if it is still valid.
         if scope_type == 'create-invoice' and credentials_company.l10n_vn_edi_token_type and credentials_company.l10n_vn_edi_token and credentials_company.l10n_vn_edi_token_expiry > datetime.now():
             return credentials_company.l10n_vn_edi_token_type, credentials_company.l10n_vn_edi_token, ""
-       
+      
         # tạm thời thay đổi GX
         #data = {'username': credentials_company.l10n_vn_edi_username, 'password': credentials_company.l10n_vn_edi_password}
+       
         data = {
             'grant_type': 'client_credentials',
             'client_id': credentials_company.client_id,
@@ -979,19 +1062,19 @@ class AccountMove(models.Model):
     def _l10n_vn_edi_is_sent(self):
         """ Small helper that returns true if self has been sent to e_invoice. """
         self.ensure_one()
-        sent_statuses = {'send', 'payment_state_to_update', 'canceled', 'adjusted', 'replaced'}
+        sent_statuses = {'sent', 'payment_state_to_update', 'canceled', 'adjusted', 'replaced'}
         return self.l10n_vn_edi_invoice_state in sent_statuses
 
     def action_show_invoice(self):
         self.ensure_one()
 
         # Kiểm tra trạng thái hóa đơn đã gửi chưa
-        if self.l10n_vn_edi_invoice_state != 'send':
+        if self.l10n_vn_edi_invoice_state == 'ready_to_send':
             raise UserError(_("Hóa đơn chưa được gửi đến hệ thống"))
         
         # Gọi API lấy PDF từ web service
         pdf_data, error_msg = self._l10n_vn_edi_fetch_invoice_pdf_file_data()
-        
+       
         if error_msg:
             raise UserError(_("Không thể lấy file PDF: %s") % error_msg)
         
@@ -1021,10 +1104,13 @@ class AccountMove(models.Model):
         if error:
                 raise UserError(error)
         
+        Data ={
+                self.invoice_id_attr
+                }
         request_response, error_message = _l10n_vn_edi_send_request(
                 method='POST',
                 url=f'{e_invoice_API_URL}api/invoice/xml-sign',
-                #json_data=invoice_json_data,
+                json_data=Data,
                 headers={'authorization':f"{token_type} {access_token}",
                          'Content-Type': 'application/json'},
             )
@@ -1034,7 +1120,7 @@ class AccountMove(models.Model):
         self.ensure_one()
 
         # Kiểm tra trạng thái hóa đơn đã gửi chưa
-        if self.l10n_vn_edi_invoice_state != 'send':
+        if self.l10n_vn_edi_invoice_state != 'sent':
             raise UserError(_("Hóa đơn chưa được gửi đến hệ thống"))
         
         token_type, access_token, error = self._l10n_vn_edi_get_access_token(scope_type='create-invoice')

@@ -14,3 +14,21 @@ class ResPartner(models.Model):
         company_dependent=True,
         copy=False,
     )
+
+    vn_budget_code = fields.Char(
+        string='Budget Code',
+        help='The budget code of the customer, used for e-invoice.',
+        copy=False,
+    )
+
+    vn_citizen_identity = fields.Char(
+        string='Citizen Identity',
+        help='The citizen identity number of the customer, used for e-invoice.',
+        copy=False,
+    )
+
+    edi_passport = fields.Char(
+        string='Passport',
+        help='The passport number of the customer, used for e-invoice.',
+        copy=False,
+    )

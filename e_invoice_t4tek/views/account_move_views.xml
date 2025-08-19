@@ -15,7 +15,7 @@
                         string="Xem HĐĐT"
                         type="object"
                         class="btn-secondary"
-                        invisible="not l10n_vn_edi_invoice_number and l10n_vn_edi_invoice_state != 'sent'"
+                        invisible="not l10n_vn_edi_invoice_number and l10n_vn_edi_invoice_state == 'ready_to_send'"
                         groups="account.group_account_invoice"/>
                 <button name="action_sign_invoice"
                         string="Ký HĐĐT"
@@ -29,6 +29,7 @@
                         class="btn-secondary"
                         invisible="not l10n_vn_edi_invoice_number and l10n_vn_edi_invoice_state != 'sent'"
                         groups="account.group_account_invoice"/>
+          
             </xpath>
             <xpath expr="//page[@id='other_tab_entry']" position="after">
                 <page id="l10n_vn_edi"

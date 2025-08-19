@@ -233,6 +233,7 @@ class TestVNEDI(AccountTestInvoicingCommon):
             'l10n_vn_edi_agreement_document_name': 'N/A',
             'l10n_vn_edi_agreement_document_date': fields.Datetime.now(),
         })
+        _logger.info('-------------> test có liên quan không')
         reversal = move_reversal.reverse_moves(is_modify=True)
         reverse_move = self.env['account.move'].browse(reversal['res_id'])
         reverse_move.invoice_line_ids[0].price_unit = 900  # New price is 900 and not 1000

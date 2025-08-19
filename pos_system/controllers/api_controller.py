@@ -173,7 +173,7 @@ class _Get_BankApiController(http.Controller):
             required_fields = [
                 'invoiceNumber', 'invoiceDate', 
                 'buyerAccount', 'buyerWallet',
-                'amount', 'paymentUuid', 'pos'
+                'amount', 'pos'
             ]
             for name in required_fields:
                 if not data.get(name):
@@ -227,9 +227,7 @@ class _Get_BankApiController(http.Controller):
                 'message': 'Không có POS này trong hệ thống.'
             }
         
-       
-        
-        
+               
             
 # -------------------------------------- Initialization Handl -------------------------------------------
 
@@ -237,8 +235,7 @@ class _Get_BankApiController(http.Controller):
         try:
             invocie_is = request.env['invoice.report'].sudo().search([
                 ('invoice_number', '=', data['invoiceNumber']),
-                 ('pos_id', '=', data['pos'].id),
-                 ('payment_uuid', '=', data['paymentUuid'])], limit=1)
+                ('pos_id', '=', data['pos'].id)], limit=1)
           
             if invocie_is:
                 return {
@@ -257,8 +254,6 @@ class _Get_BankApiController(http.Controller):
                 'buyer_wallet':data['buyerWallet'],
                 'amount': data['amount'],
                 'description': data['description'] if data['description'] else '',
-                'payment_uuid': data['paymentUuid'],
-               
             })
 
             return {
