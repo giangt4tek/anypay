@@ -5,7 +5,7 @@
             <field name="name">invoice.report.list</field>
             <field name="model">invoice.report</field>
             <field name="arch" type="xml">
-                <list string="Danh sách hóa đơn" default_order="payment_time desc" create="0">
+                <list string="Danh sách hóa đơn" default_order="invoice_date desc" create="0">
                     <field name="invoice_number"/>
                     <field name="invoice_date"/>
                     <field name="buyer_name"/>
@@ -38,7 +38,6 @@
                     <field name="acc_number"/>
                     <field name="amount"/>
                     <field name="currency_id"/>
-                    <field name="payment_time"/>
                 </group>
                 <group>
                     <field name="transaction_id" readonly="1"/>

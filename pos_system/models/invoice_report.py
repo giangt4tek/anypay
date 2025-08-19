@@ -4,7 +4,7 @@ import logging
 import json
 from odoo.http import request
 _logger = logging.getLogger(__name__)
-from ..controllers.api_controller import _send_request
+from ..controllers.api_controller import _send_request, get_system_name
 
 class InvoiceReport(models.Model):
     _name = 'invoice.report'
@@ -145,7 +145,8 @@ class InvoiceReport(models.Model):
         invoice_data = {
             'invoiceNumber': str(self.invoice_number or ''),
             'invoiceDate': self.invoice_date.strftime('%Y-%m-%d %H:%M:%S') if self.invoice_date else '',
-            'POSLocal': str(self.pos_id.pos_name or ''),
+            'POSLocal': str(self.pos_id.id or ''),
+            'POSProvide' : str(get_system_name('name')),
             'amount': float(self.amount or 0.0),
             'description': str(self.description or ''),
             'buyer': self._add_buyer_information(),

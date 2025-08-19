@@ -240,7 +240,6 @@ class _Get_BankApiController(http.Controller):
                 'POSLocal': data.get('POSLocal') or '',
                 'amount': data.get('amount'),
                 'description': data.get('description') or '',
-                'paymentUuid': data.get('paymentUuid'),
                 'buyerName': buyer_info.get('buyerName'),
                 'buyerAccount': buyer_info.get('buyerAccount'),
                 'buyerBank': buyer_info.get('buyerBank'),
@@ -296,7 +295,6 @@ class _Get_BankApiController(http.Controller):
             #         invoice_record = request.env['invoice.report'].sudo().search([
             #             ('invoice_number', '=', invoice_info['invoiceNumber']),
             #             ('acc_number', '=', invoice_info['acc_number']),
-            #             ('payment_uuid', '=', invoice_info['paymentUuid'])
             #         ], limit=1)
                    
             #         invoice_record.set_done(result.get('transactionUuid'))  # Cập nhật trạng thái hóa đơn thành 'done'
@@ -380,7 +378,7 @@ class _Get_BankApiController(http.Controller):
 
         # ---------------   Xử lý khi giao dịch dạng Thanh toán hóa đơn --------------------
             if data['transactionType'] == 'payment':
-                required_fields = ['invoiceNumber', 'acc_number', 'paymentUuid']
+                required_fields = ['invoiceNumber', 'acc_number']
                 for name in required_fields:
                     if not data.get(name):
                         return {
@@ -390,8 +388,7 @@ class _Get_BankApiController(http.Controller):
               
                 invocie = request.env['invoice.report'].sudo().search([
                             ('invoice_number', '=', data['invoiceNumber']),
-                            ('acc_number', '=', data['acc_number']),
-                            ('payment_uuid', '=', data['paymentUuid'])], limit=1)
+                            ('acc_number', '=', data['acc_number']),], limit=1)
                
                 if invocie:
                    invocie.set_done(data['transactionUuid'])
@@ -455,8 +452,7 @@ class _Get_BankApiController(http.Controller):
        
             invocie_is = request.env['invoice.report'].sudo().search([
                 ('invoice_number', '=', data['invoiceNumber']),
-                 ('acc_number', '=', data['acc_number']),
-                 ('payment_uuid', '=', data['paymentUuid'])], limit=1)
+                 ('acc_number', '=', data['acc_number']),], limit=1)
             if invocie_is:
                 return {
                     'status': False,
@@ -469,7 +465,7 @@ class _Get_BankApiController(http.Controller):
             required_fields = [
                 'invoiceNumber', 'invoiceDate', 
                 'buyerName', 'buyerAccount', 'buyerBank',
-                'amount', 'paymentUuid'
+                'amount', 
             ]
             for name in required_fields:
                 if not data.get(name):
@@ -487,7 +483,6 @@ class _Get_BankApiController(http.Controller):
                 'buyer_bank_code': data.get('buyerBank'),
                 'amount': data.get('amount'),
                 'description': data.get('description') if data.get('description') else '',
-                'payment_uuid': data.get('paymentUuid'),
                 'account_id': acc['bankAccount'].id,
                 'bank': _BANK
             })

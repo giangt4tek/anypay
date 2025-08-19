@@ -221,7 +221,8 @@ class _Get_WalletApiController(http.Controller):
             if status  == True:
                POS = response.get('result', {}).get('pos')
                data['sellerBank'] = POS.get('bankCode', '')
-               data['sellerAccount'] = POS.get('bankAcc', '')  
+               data['sellerAccount'] = POS.get('bankAcc', '') 
+               data['posProvide'] = POS.get('posProvide', '') 
                data['sellerName'] = POS.get('posUser', '')
                data['POSLocal'] = POS.get('posName', '')
             else:
@@ -263,7 +264,8 @@ class _Get_WalletApiController(http.Controller):
                 'wallet': buyer_info.get('buyerWallet'),
                 'invoiceNumber': data.get('invoiceNumber'),
                 'invoiceDate': data.get('invoiceDate'),
-                'POSLocal': data.get('POSLocal') or '',
+                'POSLocal': data.get('POSLocal'),
+                'POSProvide' : data.get('POSProvide'),
                 'amount': data.get('amount'),
                 'description': data.get('description') or '',
                 'sellerName': seller_info.get('sellerName'),
@@ -299,6 +301,8 @@ class _Get_WalletApiController(http.Controller):
             # === 3. Gọi xử lý thanh toán ===
                 invoice_record = request.env['invoice.report'].sudo().search([
                         ('invoice_number', '=', invoice_info['invoiceNumber']),
+                        ('pos_provide' , '=' , invoice_info['POSProvide']),
+                        ('pos_local' , '=' , invoice_info['POSLocal']),
                         ('acc_number', '=', invoice_info['acc_number']),
                     ], limit=1)
                 

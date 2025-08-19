@@ -267,6 +267,7 @@ class TransactionHandle(models.Model):
             required_fields = [
                 'acc_number', 'invoiceNumber', 'invoiceDate',
                 'sellerAccount', 'sellerBank',
+                'POSLocal', 'POSProvide',
                 'amount',
             ]
             for name in required_fields:
@@ -282,6 +283,8 @@ class TransactionHandle(models.Model):
            
             invocie_is = self.env['invoice.report'].sudo().search([
                 ('invoice_number', '=', data['invoiceNumber']),
+                ('pos_provide' , '=' , data['POSProvide']),
+                ('pos_local' , '=' , data['POSLocal']),
                  ('acc_number', '=', data['acc_number']), ], limit=1)
             if invocie_is:
                 return {
@@ -295,7 +298,8 @@ class TransactionHandle(models.Model):
             invoice = self.env['invoice.report'].sudo().create({
                 'invoice_number': data.get('invoiceNumber'),
                 'invoice_date': data.get('invoiceDate'),
-                'pos_local': data.get('POSLocal', ''),
+                'pos_provide': data.get('POSProvide'),
+                'pos_local': data.get('POSLocal'),
                 'seller_name': data.get('sellerName', ''),
                 'seller_account': data.get('sellerAccount'),
                 'seller_bank_code': data.get('sellerBank'),

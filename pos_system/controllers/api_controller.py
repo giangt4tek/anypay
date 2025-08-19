@@ -1,3 +1,4 @@
+import configparser
 from odoo import _, api, http, fields
 import json
 import requests
@@ -9,11 +10,21 @@ import uuid
 from odoo.exceptions import UserError
 import logging
 _logger = logging.getLogger(__name__)
+import os
 from dateutil.relativedelta import relativedelta
 _TIMEOUT = 60 
 _API_URL = ''
-_BANK = 'ACB'
 _TRANSFER_BANK = ''
+
+def get_system_name(var):
+    config = configparser.ConfigParser()
+    # Lấy thư mục gốc của module (controllers → pos_system)
+    module_path = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+    # Ghép tới file constants.ini
+    config_path = os.path.join(module_path, 'data', 'constants.ini')
+    # Đọc file .ini
+    config.read(config_path)
+    return config['system'][var]
 
 def _send_request(method, url, json_data=None, form_data=None, params=None, headers=None, cookies=None):
     """ Send a request to the API based on the given parameters. In case of errors, the error message is returned. """

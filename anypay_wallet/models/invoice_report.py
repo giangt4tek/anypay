@@ -16,7 +16,8 @@ class InvoiceReport(models.Model):
     seller_account = fields.Char(string='Tài khoản Seller', required=True)
     seller_bank_code = fields.Char(string='Ngân hàng Seller', required=True)
     pos_key = fields.Char(string='Mã POS')
-    pos_local = fields.Char(string='Điểm bán')
+    pos_local = fields.Char(string='Điểm bán', required=True)
+    pos_provide = fields.Char(string='Nhà cung cấp POS', required=True)
     wallet = fields.Char(string='Ví điện tử', store=True, readonly=True)
     account_id = fields.Many2one('t4tek.wallet.account', string='Chủ tài khoản', help="Chủ tài khoản giao dịch")
     acc_number = fields.Char(
@@ -39,6 +40,7 @@ class InvoiceReport(models.Model):
     #payment_time = fields.Datetime(string='Thời gian thanh toán')
     payment_report_ids = fields.One2many( 'transaction.report', 'invoice_id', string="Báo cáo giao dịch")
     transaction_id = fields.Char(string='Mã giao dịch hệ thống', readonly=True, copy=False)
+    
     # payment_uuid = fields.Char(string='ID thanh toán', required=True)
     state = fields.Selection([
         ('draft', 'Khởi tạo'),
