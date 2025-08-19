@@ -148,7 +148,6 @@ class InvoiceReport(models.Model):
             'POSLocal': str(self.pos_id.pos_name or ''),
             'amount': float(self.amount or 0.0),
             'description': str(self.description or ''),
-            # 'paymentUuid': str(self.payment_uuid or ''),
             'buyer': self._add_buyer_information(),
             'seller': self._add_seller_information(),
             

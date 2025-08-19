@@ -176,7 +176,7 @@ class TransactionHandle(models.Model):
                
                 payload = {}
             
-                required_fields = ['monneyAmount', 'invoiceNumber', 'paymentUuid',
+                required_fields = ['monneyAmount', 'invoiceNumber', 
                                    'transactionType',
                                    'acc_number', 'transferAccNumber',
                                    'transferWallet']
@@ -267,7 +267,7 @@ class TransactionHandle(models.Model):
             required_fields = [
                 'acc_number', 'invoiceNumber', 'invoiceDate',
                 'sellerAccount', 'sellerBank',
-                'amount', 'paymentUuid'
+                'amount',
             ]
             for name in required_fields:
                 if not data.get(name):
@@ -282,8 +282,7 @@ class TransactionHandle(models.Model):
            
             invocie_is = self.env['invoice.report'].sudo().search([
                 ('invoice_number', '=', data['invoiceNumber']),
-                 ('acc_number', '=', data['acc_number']),
-                 ('payment_uuid', '=', data['paymentUuid'])], limit=1)
+                 ('acc_number', '=', data['acc_number']), ], limit=1)
             if invocie_is:
                 return {
                     'status': False,
@@ -302,7 +301,6 @@ class TransactionHandle(models.Model):
                 'seller_bank_code': data.get('sellerBank'),
                 'amount': data.get('amount'),
                 'description': data.get('description', ''),
-                'payment_uuid': data.get('paymentUuid'),
                 'account_id': acc['walletAccount'].id,
                 'wallet': _WALLET
             })

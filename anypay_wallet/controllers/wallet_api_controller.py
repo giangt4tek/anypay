@@ -266,7 +266,6 @@ class _Get_WalletApiController(http.Controller):
                 'POSLocal': data.get('POSLocal') or '',
                 'amount': data.get('amount'),
                 'description': data.get('description') or '',
-                'paymentUuid': data.get('paymentUuid'),
                 'sellerName': seller_info.get('sellerName'),
                 'sellerAccount': seller_info.get('sellerAccount'),
                 'sellerBank': seller_info.get('sellerBank'),
@@ -301,7 +300,6 @@ class _Get_WalletApiController(http.Controller):
                 invoice_record = request.env['invoice.report'].sudo().search([
                         ('invoice_number', '=', invoice_info['invoiceNumber']),
                         ('acc_number', '=', invoice_info['acc_number']),
-                        ('payment_uuid', '=', invoice_info['paymentUuid'])
                     ], limit=1)
                 
                 if invoice_record: 
@@ -334,7 +332,6 @@ class _Get_WalletApiController(http.Controller):
                 #     'transactionType': 'payment',
                 #     'monneyAmount': data.get('amount'), 
                 #     'invoiceNumber': data.get('invoiceNumber'),
-                #     'paymentUuid': data.get('paymentUuid'),}
                 
                 # result = request.env["transaction.handle"]._process_transaction(transfer_data)
                 #if result.get('status'):
@@ -342,7 +339,6 @@ class _Get_WalletApiController(http.Controller):
                     # invoice_record = request.env['invoice.report'].sudo().search([
                     #     ('invoice_number', '=', invoice_info['invoiceNumber']),
                     #     ('acc_number', '=', invoice_info['acc_number']),
-                    #     ('payment_uuid', '=', invoice_info['paymentUuid'])
                     # ], limit=1)
                    
                     #invoice_record.set_done(result.get('transactionUuid'))  # Cập nhật trạng thái hóa đơn thành 'done'

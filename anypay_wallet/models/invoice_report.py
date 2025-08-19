@@ -39,7 +39,7 @@ class InvoiceReport(models.Model):
     #payment_time = fields.Datetime(string='Thời gian thanh toán')
     payment_report_ids = fields.One2many( 'transaction.report', 'invoice_id', string="Báo cáo giao dịch")
     transaction_id = fields.Char(string='Mã giao dịch hệ thống', readonly=True, copy=False)
-    payment_uuid = fields.Char(string='ID thanh toán', required=True)
+    # payment_uuid = fields.Char(string='ID thanh toán', required=True)
     state = fields.Selection([
         ('draft', 'Khởi tạo'),
         ('done', 'Hoàn tất'),
@@ -141,7 +141,6 @@ class InvoiceReport(models.Model):
                         'transferWallet': self.seller_bank_code,
                         'transactionType': 'payment',
                         'invoiceNumber': self.invoice_number,
-                        'paymentUuid': self.payment_uuid,
                         'monneyAmount': self.amount, }
                 
                    
@@ -191,7 +190,6 @@ class InvoiceReport(models.Model):
             'POSLocal': str(self.pos_local or ''),
             'amount': float(self.amount or 0.0),
             'description': str(self.description or ''),
-            'paymentUuid': str(self.payment_uuid or ''),
             'buyer': self._add_buyer_information(),
             'seller': self._add_seller_information(),
             
