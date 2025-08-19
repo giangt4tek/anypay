@@ -36,7 +36,7 @@ class InvoiceReport(models.Model):
 
     description = fields.Text(string='Nội dung thanh toán')
 
-    payment_time = fields.Datetime(string='Thời gian thanh toán')
+    #payment_time = fields.Datetime(string='Thời gian thanh toán')
     payment_report_ids = fields.One2many( 'transaction.report', 'invoice_id', string="Báo cáo giao dịch")
     transaction_id = fields.Char(string='Mã giao dịch hệ thống', readonly=True, copy=False)
     payment_uuid = fields.Char(string='ID thanh toán', required=True)
