@@ -201,49 +201,41 @@ class _Get_WalletApiController(http.Controller):
     def create_invoice_debit(self, **post):
         raw_body = request.httprequest.get_data(as_text=True)
         data = json.loads(raw_body)
+        data = request.httprequest.form
+        invoices = data.get("invoices", [])
+        card_id = data.get('id')
+        _logger.info(f"---> Số thẻ: {card_id} ")
+       
+        
+        results = []
+        for inv in invoices:
+            _logger.info(f"---> Nhận hóa đơn: {inv} ")
 
-        pos_key = data.get('posKey', '')
-        if pos_key:
-            Data = {'posKey': pos_key}
+            #request.env["transaction.handle"].create_invoice(inv)
+            # invoice_number = inv.get("invoiceNumber")
+            # invoice_date = inv.get("invoiceDate")
+            # pos_key = inv.get("secretKey")
+            # pos_provide = inv.get("posProvide")
+            # amount = inv.get("amount")
             
-            response, error = request.env['transaction.handle']._send_request(
-                method='POST',
-                url=f'https://tpos.t4tek.tk/pos/lookup',
-                json_data=Data,
-                headers={'Content-Type': 'application/json'},
-            )
-            if error:
-                return {
-                    'status': 'error',
-                    'message': error,
-                }
-            status = response.get('result', {}).get('status')
-            if status  == True:
-               POS = response.get('result', {}).get('pos')
-               data['sellerBank'] = POS.get('bankCode', '')
-               data['sellerAccount'] = POS.get('bankAcc', '') 
-               data['posProvide'] = POS.get('posProvide', '') 
-               data['sellerName'] = POS.get('posUser', '')
-               data['POSLocal'] = POS.get('posName', '')
-            else:
-                return {
-                    'status': 'error',
-                    'message': 'Không tìm thấy POS với Key đã cung cấp.'
-                }
+       
 
+        # if not (pos_key and pos_provide):
+        #     _logger.info(f'Dữ liệu hóa đơn: {[data.get('invoiceNumber', '')]} trong thẻ không có Key hoặc Provide của POS')
+        
+        # Key = {'posKey': pos_key}
+        
 
-        invCreate = request.env["transaction.handle"].create_invoice(data)    
-        if invCreate['status']: 
-            return {
-                'status': 'success',
-                'message': 'Hóa đơn đã được ghi nhận.'
-            }
-        else:
-            return {
-                    'status': 'error',
-                    'message': 'Hóa đơn không được ghi nhận.',
-                    'Fail': invCreate['message']
-                }   
+            # pos_contact = self.env['wallet.contact'].sudo().search([
+            #     ('wallet_code', '=', rec.seller_bank_code)], limit=1)
+            
+            # if not bank_contact or not bank_contact.api_url:
+            #     results.append({
+            #         "invoice": rec.invoice_number,
+            #         "status": 'error',
+            #         "message": f"Không có URL API của ngân hàng [{rec.seller_bank_code}]"
+            #     })
+        
         
     @http.route('/api/invoice/payment', type='json', auth='none', methods=["POST"], csrf=False)
     def invoice_payment(self, **post):

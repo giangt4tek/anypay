@@ -285,7 +285,7 @@ class TransactionHandle(models.Model):
                 ('invoice_number', '=', data['invoiceNumber']),
                 ('pos_provide' , '=' , data['POSProvide']),
                 ('pos_local' , '=' , data['POSLocal']),
-                 ('acc_number', '=', data['acc_number']), ], limit=1)
+                ('acc_number', '=', data['acc_number']), ], limit=1)
             if invocie_is:
                 return {
                     'status': False,
@@ -323,4 +323,43 @@ class TransactionHandle(models.Model):
                 'message': f"Lỗi hệ thống: {str(e)}"
             }
         
-         
+    def pos_system_sync(self, data):
+
+        response, error = request.env['transaction.handle']._send_request(
+                method='POST',
+                url=f'https://tpos.t4tek.tk/pos/lookup',
+                json_data=Key,
+                headers={'Content-Type': 'application/json'},
+            )
+        if error:
+                return {
+                    'status': 'error',
+                    'message': error,
+                }
+        status = response.get('result', {}).get('status')
+        if status  == True:
+           POS = response.get('result', {}).get('pos')
+           data['sellerBank'] = POS.get('bankCode', '')
+           data['sellerAccount'] = POS.get('bankAcc', '') 
+           data['posProvide'] = POS.get('posProvide', '') 
+           data['sellerName'] = POS.get('posUser', '')
+           data['POSLocal'] = POS.get('posName', '')
+        else:
+            return {
+                'status': 'error',
+                'message': 'Không tìm thấy POS với Key đã cung cấp.'
+            }
+
+
+        invCreate = request.env["transaction.handle"].create_invoice(data)    
+        if invCreate['status']: 
+            return {
+                'status': 'success',
+                'message': 'Hóa đơn đã được ghi nhận.'
+            }
+        else:
+            return {
+                    'status': 'error',
+                    'message': 'Hóa đơn không được ghi nhận.',
+                    'Fail': invCreate['message']
+                }   

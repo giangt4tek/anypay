@@ -20,12 +20,15 @@ class T4tekWalletAccount(models.Model):
     
     def generate_acc_number(self):
         for rec in self:
+            if rec.acc_number:
+                if self.env['invoice.report'].search( [('account_id', '=', rec.id)]):
+                    raise UserError("Tài khoản thẻ này đã phát sinh giao dịch, không được thay đổi")
             existing_numbers = self.search([]).mapped('acc_number')
-            while True:
-                new_number = ''.join(random.choices('0123456789', k=11))
-                if new_number not in existing_numbers:
-                    break
-            
+           
+            new_number = ''.join(random.choices('0123456789', k=11))
+            if new_number not in existing_numbers:
+               raise UserError("Tài khoản thẻ này đã tồn tại")
+
             raw_key = str(uuid.uuid4())
             
             hashed_key = hashlib.sha256((raw_key).encode()).hexdigest()
@@ -76,7 +79,8 @@ class T4tekWalletAccount(models.Model):
                 raise UserError("Bắt buộc phải có số tài khoản (acc_number).")
             else:
                 item.is_active = True
-        return {}
+       
+    
     
 
 

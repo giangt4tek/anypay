@@ -25,14 +25,14 @@
         <!-- <menuitem id="menu_contact_wallet_root" name="wallet" sequence="10" groups="manager_wallet"/> -->
 
         <menuitem id="menu_wallet_res_partner"
-                  name="Đối tác Wallet"
+                  name="Người dùng Wallet"
                   parent="menu_t4tek_wallet_root"
                   action="base.action_partner_form"
                   groups="manager_wallet"
                   sequence="10"/>
 
         <menuitem id="menu_wallet_contact" 
-                  name="Danh sách Ví AnyPay" 
+                  name="Đối tác ví AnyPay" 
                   parent="menu_t4tek_wallet_root" 
                   action="action_wallet_contact"
                   groups="manager_wallet"
