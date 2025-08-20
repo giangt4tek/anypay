@@ -201,9 +201,9 @@ class _Get_WalletApiController(http.Controller):
     def create_invoice_debit(self, **post):
         raw_body = request.httprequest.get_data(as_text=True)
         data = json.loads(raw_body)
-        data = request.httprequest.form
+        header = request.httprequest.headers
         invoices = data.get("invoices", [])
-        card_id = data.get('id')
+        card_id = header.get('id')
         _logger.info(f"---> Số thẻ: {card_id} ")
        
         
