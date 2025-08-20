@@ -469,7 +469,7 @@ class _Get_BankApiController(http.Controller):
             # Kiểm tra các trường bắt buộc
             required_fields = [
                 'invoiceNumber', 'invoiceDate', 
-                'amount', 'POSProvide', 'pos_local'
+                'amount', 'POSProvide', 'POSLocal'
             ]
             for name in required_fields:
                 if not data.get(name):
