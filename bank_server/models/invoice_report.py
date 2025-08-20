@@ -12,13 +12,14 @@ class InvoiceReport(models.Model):
 
     invoice_number = fields.Char(string='Mã hóa đơn', required=True)
     invoice_date = fields.Datetime(string='Thời gian tạo hóa đơn', default=fields.Datetime.now)
-    buyer_name = fields.Char(string='Người thanh toán', required=True)
-    buyer_account = fields.Char(string='Tài khoản thanh toán', required=True)
-    buyer_bank_code = fields.Char(string='Ngân hàng thanh toán', required=True)
-    pos_local = fields.Char(string='Điểm bán')
-    
+    # buyer_name = fields.Char(string='Người thanh toán', required=True)
+    # buyer_account = fields.Char(string='Tài khoản thanh toán', required=True)
+    # buyer_bank_code = fields.Char(string='Ngân hàng thanh toán', required=True)
+    pos_local = fields.Char(string='Điểm bán', required=True)
+    pos_provide = fields.Char(string='Nhà cung cấp POS', required=True)
     account_id = fields.Many2one('t4tek.bank.account', string='Chủ tài khoản', help="Chủ tài khoản giao dịch")
-    bank = fields.Char(string='Ngân hàng', store=True, readonly=True)
+    #bank = fields.Char(string='Ngân hàng', store=True, readonly=True)
+    
     acc_number = fields.Char(
                  string="Số tài khoản",
                  related='account_id.acc_number',

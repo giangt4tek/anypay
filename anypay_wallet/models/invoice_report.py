@@ -191,7 +191,8 @@ class InvoiceReport(models.Model):
         invoice_data = {
             'invoiceNumber': str(self.invoice_number or ''),
             'invoiceDate': self.invoice_date.strftime('%Y-%m-%d %H:%M:%S') if self.invoice_date else '',
-            'POSLocal': str(self.pos_local or ''),
+            'POSLocal': str(self.pos_local),
+            'POSProvide': str(self.pos_provide),
             'amount': float(self.amount or 0.0),
             'description': str(self.description or ''),
             'buyer': self._add_buyer_information(),

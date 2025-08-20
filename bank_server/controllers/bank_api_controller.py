@@ -234,16 +234,16 @@ class _Get_BankApiController(http.Controller):
            
             invoice_info = {
                 'acc_number': seller_info.get('sellerAccount'),
-                'wallet': seller_info.get('sellerBank'),
+                'bank': seller_info.get('sellerBank'),
                 'invoiceNumber': data.get('invoiceNumber'),
                 'invoiceDate': data.get('invoiceDate'),
-                'POSLocal': data.get('POSLocal') or '',
+                'POSLocal': data.get('POSLocal'),
+                'POSProvide': data.get('POSProvide'),
                 'amount': data.get('amount'),
                 'description': data.get('description') or '',
-                'buyerName': buyer_info.get('buyerName'),
-                'buyerAccount': buyer_info.get('buyerAccount'),
-                'buyerBank': buyer_info.get('buyerBank'),
-                
+                # 'buyerName': buyer_info.get('buyerName'),
+                # 'buyerAccount': buyer_info.get('buyerAccount'),
+                # 'buyerBank': buyer_info.get('buyerBank'),
             }
 
             _logger.info('-----------> data: %s', invoice_info)
@@ -255,7 +255,7 @@ class _Get_BankApiController(http.Controller):
                     'message': invCreate['message'],
                      
                 }
-            _logger.info('-----------> tạo hđ')
+            _logger.info('-----------> tạo hđ %s', invCreate)
             if invCreate.get('is_ivoice') == True and invCreate.get('invoice_state') == 'draft':  
                 return {
                     'status': 'Success',
@@ -449,13 +449,15 @@ class _Get_BankApiController(http.Controller):
     def create_invoice(self, data):
         try:
             
-            acc = self.check_access_bank(data['acc_number'], _BANK)
+            acc = self.check_access_bank(data['acc_number'], data['bank'])
     
             if not acc['status']: return acc
        
             invocie_is = request.env['invoice.report'].sudo().search([
                 ('invoice_number', '=', data['invoiceNumber']),
-                 ('acc_number', '=', data['acc_number']),], limit=1)
+                ('pos_provide' , '=' , data['POSProvide']),
+                ('pos_local' , '=' , data['POSLocal']),
+                ('acc_number', '=', data['acc_number']),], limit=1)
             if invocie_is:
                 return {
                     'status': False,
@@ -467,8 +469,7 @@ class _Get_BankApiController(http.Controller):
             # Kiểm tra các trường bắt buộc
             required_fields = [
                 'invoiceNumber', 'invoiceDate', 
-                'buyerName', 'buyerAccount', 'buyerBank',
-                'amount', 
+                'amount', 'POSProvide', 'pos_local'
             ]
             for name in required_fields:
                 if not data.get(name):
@@ -480,14 +481,15 @@ class _Get_BankApiController(http.Controller):
             invoice = request.env['invoice.report'].sudo().create({
                 'invoice_number': data.get('invoiceNumber'),
                 'invoice_date': data.get('invoiceDate'),
-                'pos_local': data.get('POSLocal') if data.get('POSLocal') else '',
-                'buyer_name': data.get('buyerName'),
-                'buyer_account': data.get('buyerAccount'),
-                'buyer_bank_code': data.get('buyerBank'),
+                'pos_local': data.get('POSLocal'),
+                'pos_provide': data.get('POSProvide'),
+                # 'buyer_name': data.get('buyerName'),
+                # 'buyer_account': data.get('buyerAccount'),
+                # 'buyer_bank_code': data.get('buyerBank'),
                 'amount': data.get('amount'),
                 'description': data.get('description') if data.get('description') else '',
                 'account_id': acc['bankAccount'].id,
-                'bank': _BANK
+                # 'bank': _BANK
             })
 
             return {
