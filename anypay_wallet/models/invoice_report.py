@@ -91,7 +91,6 @@ class InvoiceReport(models.Model):
         results = []
 
         for rec in self.sudo():
-          
             bank_contact = self.env['wallet.contact'].sudo().search([
                 ('wallet_code', '=', rec.seller_bank_code)], limit=1)
             
@@ -122,6 +121,7 @@ class InvoiceReport(models.Model):
                 json_data=Data,
                 headers={'Content-Type': 'application/json'},
             )
+            _logger.info('---------------> response: %s', response)
             if error:
                 results.append({
                     "invoice": rec.invoice_number,
