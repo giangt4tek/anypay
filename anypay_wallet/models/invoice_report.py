@@ -132,7 +132,9 @@ class InvoiceReport(models.Model):
                 status = response.get('result', {}).get('status')
                 message = response.get('result', {}).get('message')
                 
-                if status == 'Success':
+            if status == 'Success':
+                invoice = response.get('result', {}).get('invoice')
+                if invoice == 'draft':
                     # Gọi hàm _process_transaction từ controller xử lý giao dịch
                      # === 3. Gọi xử lý thanh toán ===
                    
@@ -155,7 +157,7 @@ class InvoiceReport(models.Model):
                         "transactionUuid": process_result.get('transactionUuid'),
                         "message": process_result.get('message'),
                     })
-                elif status == 'notify':
+                elif status == 'done':
                     transaction_id = response.get('result', {}).get('transaction_id')
                     payment_is = self.env['transaction.report'].sudo().search([
                         ('transaction_type', '=', 'payment'),

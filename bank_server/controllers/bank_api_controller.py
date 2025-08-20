@@ -246,7 +246,7 @@ class _Get_BankApiController(http.Controller):
                 
             }
 
-            
+            _logger.info('-----------> data: %s', invoice_info)
             # === 2. Ghi nhận hóa đơn ===
             invCreate = self.create_invoice(invoice_info)
             if invCreate.get('status') == False and invCreate.get('is_ivoice') == False:
@@ -255,9 +255,11 @@ class _Get_BankApiController(http.Controller):
                     'message': invCreate['message'],
                      
                 }
+            _logger.info('-----------> tạo hđ')
             if invCreate.get('is_ivoice') == True and invCreate.get('invoice_state') == 'draft':  
                 return {
                     'status': 'Success',
+                    'invoice': 'draft',
                     'message': 'Hóa đơn đã được ghi nhận nhưng chưa thanh toán.',
                    
                 }
@@ -271,7 +273,8 @@ class _Get_BankApiController(http.Controller):
 
                 if transfer_is:
                     return {
-                        'status': 'notify',
+                        'status': 'Success',
+                        'invoice': 'done',
                         'message': 'Hóa đơn đã được thanh toán trước đó.',
                         'transaction_id': invCreate.get('transaction_id')
 
