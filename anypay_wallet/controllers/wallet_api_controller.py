@@ -218,7 +218,7 @@ class _Get_WalletApiController(http.Controller):
             # pos_provide = inv.get("posProvide")
             # amount = inv.get("amount")
             
-       
+        return "Ok, đã chạy xong"
 
         # if not (pos_key and pos_provide):
         #     _logger.info(f'Dữ liệu hóa đơn: {[data.get('invoiceNumber', '')]} trong thẻ không có Key hoặc Provide của POS')
