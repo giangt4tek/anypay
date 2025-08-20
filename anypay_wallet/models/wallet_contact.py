@@ -6,10 +6,10 @@ class WalletContact(models.Model):
       _name = 'wallet.contact'
       _description = 'Wallet Information'
 
-      wallet_code = fields.Char(string='Mã Ví AnyPay', required=True)
-      _sql_constraints = [('wallet_code_unique', 'unique(wallet_code)', 'Ví AnyPay này đã có.')]
-      wallet_name = fields.Char(string='Tên Ví AnyPay', required=True)
-      api_url = fields.Char(string="URL gọi API của Ví AnyPay")
+      wallet_code = fields.Char(string='Mã đối tác', required=True)
+      _sql_constraints = [('wallet_code_unique', 'unique(wallet_code)', 'Đối tác này đã có.')]
+      wallet_name = fields.Char(string='Tên đối tác', required=True)
+      api_url = fields.Char(string="URL gọi API của đối tác")
       
       
       @api.model
