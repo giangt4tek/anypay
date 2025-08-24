@@ -180,7 +180,7 @@ class _Get_BankApiController(http.Controller):
                 }   
 
     def check_access_pos(self, SecretKey, PosProvide):
-        POS = self.env['pos.category'].sudo().search([
+        POS = request.env['pos.category'].sudo().search([
             ('secret_key', '=', SecretKey)], limit=1)
         error = None
         PosName = self.get_system_name('name')
