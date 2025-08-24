@@ -131,8 +131,8 @@ class _Get_WalletApiController(http.Controller):
             inv.update({'buyerWallet': _WALLET})
             inv_is = request.env["transaction.handle"].pos_system_sync(inv)
             
-            if inv_is.get('status') == False:
-               _logger.info(f"---> Hóa đơn lỗi: {inv} ")
+            
+            _logger.info(f"---> Hóa đơn lỗi: {inv_is} ")
             # invoice_number = inv.get("invoiceNumber")
             # invoice_date = inv.get("invoiceDate")
             # pos_key = inv.get("secretKey")
