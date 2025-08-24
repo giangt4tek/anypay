@@ -205,18 +205,25 @@ class _Get_BankApiController(http.Controller):
                     'Fail': invCreate['message']
                 }   
         
-    @http.route('/pos/lookup', type='json', auth='none', methods=["POST"], csrf=False)
+    @http.route('/wallet/invoice/sync', type='json', auth='none', methods=["POST"], csrf=False)
     def pos_lookup(self, **post):
         
         raw_body = request.httprequest.get_data(as_text=True)
         data = json.loads(raw_body)
         required_fields = ['posKey']
+        required_fields = [
+                'invoiceNumber', 'invoiceDate', 
+                'buyerAccount', 'buyerWallet',
+                'amount', 'pos'
+            ]
         for name in required_fields:
                 if not data.get(name):
                    return {
                          'status': False,
                          'message': f'Trường [{name}] không có dữ liệu'  }
-        
+                
+        invCreate = self.create_invoice(data)  
+
         POS = request.env['pos.category'].sudo().search([
             ('secret_key', '=', data['posKey'])
         ], limit=1)
@@ -225,6 +232,7 @@ class _Get_BankApiController(http.Controller):
             return {
                 'status': True,
                 'pos': {
+                    'posID': POS.id,
                     'posName': POS.pos_name,
                     'posUser': POS.pos_user,
                     'bankCode': POS.bank_code,

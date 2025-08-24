@@ -14,89 +14,9 @@ _TIMEOUT = 60
 _API_URL = ''
 _WALLET = 'VMONNEY'
 
-
-# def _send_request(method, url, json_data=None, form_data=None, params=None, headers=None, cookies=None):
-#     """ Send a request to the API based on the given parameters. In case of errors, the error message is returned. """
-#     try:
-#         if json_data:
-#             resp = requests.request(
-#                 method,
-#                 url,
-#                 json=json_data,
-#                 params=params,
-#                 headers=headers,
-#                 cookies=cookies,
-#                 timeout=_TIMEOUT
-#             )
-#         elif form_data:
-#             resp = requests.request(
-#                 method,
-#                 url,
-#                 data=form_data,  # Đây là điểm quan trọng cho x-www-form-urlencoded
-#                 params=params,
-#                 headers=headers,
-#                 cookies=cookies,
-#                 timeout=_TIMEOUT
-#             )
-#         else:
-#             resp = requests.request(
-#                 method,
-#                 url,
-#                 params=params,
-#                 headers=headers,
-#                 cookies=cookies,
-#                 timeout=_TIMEOUT
-#             )
-        
-#         resp_json = resp.json()
-#         error = None
-        
-#         if resp_json.get('code') or resp_json.get('error'):
-#             data = resp_json.get('data') or resp_json.get('error')
-#             error = _('Error when contacting e_invoice: %s.', data)
-#         return resp_json, error
-#     except (RequestException, ValueError) as err:
-#         return {}, _('Something went wrong, please try again later: %s', err)
-
-
 class _Get_WalletApiController(http.Controller):
     _name  = 'wallet.api.controller'
-
-    # def send_transfer_request(self, Data, contact_):
-        
-    #     infor_contact = request.env['wallet.contact'].sudo().search([
-    #         ('wallet_code', '=', contact_)], limit=1)
-        
-    #     if not infor_contact:
-    #         return {
-    #             "status": 'error',
-    #             "message": f'Không tìm thấy đối tác [{contact_}]',
-    #         }
-    #     if not infor_contact.api_url:
-    #         code = infor_contact.get('wallet_code')
-    #         return {
-    #             "status": 'error',
-    #             "message": f'Không có URL API của Ví AnyPay [{code}] ',
-    #         }
-        
-    #     response, error = _send_request(
-    #         method='POST',
-    #         url=f'{infor_contact.api_url}api/transaction/transfer/in',
-    #         json_data=Data,
-    #         headers={'Content-Type': 'application/json'},
-    #     )
-    #     if error: 
-    #         return {
-    #             "status": 'error',
-    #             "message": error,
-    #         }
-    #     else:    
-    #         return {
-    #             "status": response.get('result', {}).get('status'),
-    #             "message": response.get('result', {}).get('message'),
-    #                 }
-        
-            
+      
     @http.route('/api/token', type='http', auth='none', methods=['POST'], csrf=False)
     def get_api_key(self, **kwargs):
         data = request.httprequest.form
@@ -204,14 +124,16 @@ class _Get_WalletApiController(http.Controller):
         header = request.httprequest.headers
         invoices = data.get("invoices", [])
         card_id = header.get('id')
-        _logger.info(f"---> Số thẻ: {card_id} ")
+        
        
         
         results = []
         for inv in invoices:
-            _logger.info(f"---> Nhận hóa đơn: {inv} ")
-
-            #request.env["transaction.handle"].create_invoice(inv)
+            inv_is.update({'acc_number': card_id})
+            inv_is = request.env["transaction.handle"].pos_system_sync(inv)
+            
+            if inv_is.get('status') == False:
+               _logger.info(f"---> Hóa đơn lỗi: {inv} ")
             # invoice_number = inv.get("invoiceNumber")
             # invoice_date = inv.get("invoiceDate")
             # pos_key = inv.get("secretKey")

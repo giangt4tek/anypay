@@ -324,11 +324,23 @@ class TransactionHandle(models.Model):
             }
         
     def pos_system_sync(self, data):
+         
+        pos_contact = self.env['wallet.contact'].sudo().search([
+                ('wallet_code', '=', data.get('posProvide'))], limit=1)
+            
+        if not pos_contact or not pos_contact.api_url:
+                results = {
+                    "invoice": data.get('invoiceNumber'),
+                    "status": 'error',
+                    "message": f"POS: [{data.get('posProvide')}] của HĐ ([{data.get('invoiceNumber')}], chưa được khai báo )"
+                }
 
-        response, error = request.env['transaction.handle']._send_request(
+        
+
+        response, error = self._send_request(
                 method='POST',
-                url=f'https://tpos.t4tek.tk/pos/lookup',
-                json_data=Key,
+                url=f'{pos_contact.api_url}wallet/invoice/sync',
+                json_data=data,
                 headers={'Content-Type': 'application/json'},
             )
         if error:
