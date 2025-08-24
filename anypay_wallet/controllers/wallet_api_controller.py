@@ -127,8 +127,8 @@ class _Get_WalletApiController(http.Controller):
         
         results = []
         for inv in invoices:
-            inv_is.update({'buyerAccount': card_id})
-            inv_is.update({'buyerWallet': _WALLET})
+            inv.update({'buyerAccount': card_id})
+            inv.update({'buyerWallet': _WALLET})
             inv_is = request.env["transaction.handle"].pos_system_sync(inv)
             
             if inv_is.get('status') == False:
