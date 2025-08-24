@@ -326,16 +326,14 @@ class TransactionHandle(models.Model):
     def pos_system_sync(self, data):
          
         pos_contact = self.env['wallet.contact'].sudo().search([
-                ('wallet_code', '=', data.get('posProvide'))], limit=1)
-            
+                ('wallet_code', '=', data.get('POSProvide'))], limit=1)
+
         if not pos_contact or not pos_contact.api_url:
                 results = {
                     "invoice": data.get('invoiceNumber'),
                     "status": 'error',
                     "message": f"POS: [{data.get('posProvide')}] của HĐ ([{data.get('invoiceNumber')}], chưa được khai báo )"
                 }
-
-        
 
         response, error = self._send_request(
                 method='POST',
@@ -349,13 +347,31 @@ class TransactionHandle(models.Model):
                     'message': error,
                 }
         status = response.get('result', {}).get('status')
+        InvoiceIS = response.get('result', {}).get('InvoiceIS')
         if status  == True:
-           POS = response.get('result', {}).get('pos')
-           data['sellerBank'] = POS.get('bankCode', '')
-           data['sellerAccount'] = POS.get('bankAcc', '') 
-           data['posProvide'] = POS.get('posProvide', '') 
-           data['sellerName'] = POS.get('posUser', '')
-           data['POSLocal'] = POS.get('posName', '')
+           CreateInvoice = {}
+           POS = response.get('result', {}).get('POS')
+           CreateInvoice.update({'acc_number': data['buyerAccount']})
+           CreateInvoice.update({'invoiceNumber': data['invoiceNumber']})
+           CreateInvoice.update({'invoiceDate': data['invoiceDate']})
+           CreateInvoice.update({'amount': data['amount']})
+           CreateInvoice.update({'sellerBank': POS.get('bankCode', '')})
+           CreateInvoice.update({'sellerAccount': POS.get('bankAcc', '')})
+           CreateInvoice.update({'sellerName': POS.get('posUser', '')})
+           CreateInvoice.update({'POSLocal': POS.get('posID', '')})
+           CreateInvoice.update({'POSProvide': POS.get('posProvide', '') })
+           invCreate = request.env["transaction.handle"].create_invoice(CreateInvoice)    
+           if invCreate['status']: 
+                return {
+                    'status': 'success',
+                    'message': 'Hóa đơn đã được ghi nhận.'
+                }
+           else:
+                return {
+                        'status': 'error',
+                        'message': 'Hóa đơn không được ghi nhận.',
+                        'Fail': invCreate['message']
+                    }   
         else:
             return {
                 'status': 'error',
@@ -363,15 +379,4 @@ class TransactionHandle(models.Model):
             }
 
 
-        invCreate = request.env["transaction.handle"].create_invoice(data)    
-        if invCreate['status']: 
-            return {
-                'status': 'success',
-                'message': 'Hóa đơn đã được ghi nhận.'
-            }
-        else:
-            return {
-                    'status': 'error',
-                    'message': 'Hóa đơn không được ghi nhận.',
-                    'Fail': invCreate['message']
-                }   
+       

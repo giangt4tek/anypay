@@ -12,6 +12,7 @@ import logging
 _logger = logging.getLogger(__name__)
 import os
 from dateutil.relativedelta import relativedelta
+
 _TIMEOUT = 60 
 _API_URL = ''
 _TRANSFER_BANK = ''
@@ -73,34 +74,7 @@ def _send_request(method, url, json_data=None, form_data=None, params=None, head
 class _Get_BankApiController(http.Controller):
     _name  = 'api.controller'
 
-    def send_transfer_request(self, Data, contact_bank):
-        
-        bank_contact = request.env['wallet.contact'].sudo().search([
-            ('wallet_code', '=', contact_bank)], limit=1)
-        
-        if not bank_contact.api_url:
-            code = bank_contact.get('wallet_code')
-            return {
-                "status": 'error',
-                "message": 'Không có URL API của ngân hàng [{code}] ',
-            }
-        
-        response, error = _send_request(
-            method='POST',
-            url=f'{bank_contact.api_url}api/transaction/transfer/in',
-            json_data=Data,
-            headers={'Content-Type': 'application/json'},
-        )
-        if error: 
-            return {
-                "status": 'error',
-                "message": error,
-            }
-        else:    
-            return {
-                "status": response.get('result', {}).get('status'),
-                "message": response.get('result', {}).get('message'),
-                    }
+    
         
     @http.route('/pos/token', type='http', auth='none', methods=['POST'], csrf=False)
     def get_api_key(self, **kwargs):
@@ -162,7 +136,7 @@ class _Get_BankApiController(http.Controller):
  
       
     @http.route('/pos/invoice/sync', type='json', auth='none', methods=["POST"], csrf=False)
-    def create_invoice_sync(self, **post):
+    def pos_invoice_sync(self, **post):
         
         auth_header = request.httprequest.headers.get('Authorization')
         if not auth_header or not auth_header.startswith("Bearer "):
@@ -204,47 +178,85 @@ class _Get_BankApiController(http.Controller):
                     'message': 'Hóa đơn không được ghi nhận.',
                     'Fail': invCreate['message']
                 }   
-        
+
+    def check_access_pos(self, SecretKey, PosProvide):
+        POS = self.env['pos.category'].sudo().search([
+            ('secret_key', '=', SecretKey)], limit=1)
+        error = None
+        PosName = self.get_system_name('name')
+        if PosProvide != PosName: error = 'Nhà cung cấp POS nhận không phù hợp'
+        if not POS:  error = f'Tài khoản này không tồn tại trong POS {PosName}'
+        if POS and PosProvide == PosName:
+            return {
+                "status": True,
+                "POSAccount": POS
+            }
+        else: return {
+                "status": False,
+                "message": error
+                }
+            
+         
     @http.route('/wallet/invoice/sync', type='json', auth='none', methods=["POST"], csrf=False)
-    def pos_lookup(self, **post):
+    def wallet_invoice_sync(self, **post):
         
         raw_body = request.httprequest.get_data(as_text=True)
         data = json.loads(raw_body)
-        required_fields = ['posKey']
+        
         required_fields = [
                 'invoiceNumber', 'invoiceDate', 
                 'buyerAccount', 'buyerWallet',
-                'amount', 'pos'
+                'amount', 'secretKey'
             ]
+       
         for name in required_fields:
                 if not data.get(name):
                    return {
                          'status': False,
                          'message': f'Trường [{name}] không có dữ liệu'  }
-                
-        invCreate = self.create_invoice(data)  
+        
+        POS = self.check_access_pos(data['secretKey'], data['POSProvide'])       
+        
+        if not POS['status']: 
+            return POS
+        
+        # Xử lý dữ liệu tạo hóa đơn
+        CreateInvoice = {}
+        CreateInvoice.update({'invoiceNumber': data.get('invoiceNumber')})
+        CreateInvoice.update({'invoiceDate': data.get('invoiceDate')})
+        CreateInvoice.update({'buyerAccount': data.get('buyerAccount')})
+        CreateInvoice.update({'buyerWallet': data.get('buyerWallet')})
+        CreateInvoice.update({'amount': data.get('amount')})
+        CreateInvoice.update({'pos': POS['POSAccount'].id})
 
-        POS = request.env['pos.category'].sudo().search([
-            ('secret_key', '=', data['posKey'])
-        ], limit=1)
-
+    
+        invCreate = self.create_invoice(CreateInvoice)  
+        invMess =''
+        if invCreate['status']: 
+           invMess  = 'Hóa đơn đã được ghi nhận.'
+        else:
+           invMess= 'Hóa đơn không được ghi nhận.',
+                    
         if POS:
             return {
                 'status': True,
-                'pos': {
+                'POS': {
                     'posID': POS.id,
                     'posName': POS.pos_name,
                     'posUser': POS.pos_user,
                     'bankCode': POS.bank_code,
                     'bankAcc': POS.bank_acc,
                 },
-                'message': 'Tìm thấy thành công POS.'
-            }
+                'InvoiceIS' :invCreate['status'],
+                'message': f'Đồng bộ thành công./{[invMess]}'
+                }
         else:
-            return {
-                'status': False,
-                'message': 'Không có POS này trong hệ thống.'
-            }
+                return {
+                    'status': False,
+                    'message': 'Không có POS này trong hệ thống.'
+                }
+       
+       
         
                
             
