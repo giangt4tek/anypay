@@ -183,6 +183,8 @@ class _Get_BankApiController(http.Controller):
         
         POS = request.env['pos.category'].sudo().search([
             ('secret_key', '=', SecretKey)], limit=1)
+   
+        _logger.info(f'----------> POS SYSTEM SYNC CHECK: {POS}')
         error = None
         PosName = get_system_name('name')
         if PosProvide.upper() != PosName.upper(): error = 'Nhà cung cấp POS nhận không phù hợp'
@@ -218,7 +220,7 @@ class _Get_BankApiController(http.Controller):
                          'message': f'Trường [{name}] không có dữ liệu'  }
         
         POS = self.check_access_pos(data['secretKey'], data['POSProvide'])       
-        _logger.info(f'----------> POS SYSTEM SYNC CHECK: {POS}')
+        
         if not POS['status']: 
             return POS
         
