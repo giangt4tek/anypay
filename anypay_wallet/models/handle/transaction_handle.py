@@ -326,8 +326,8 @@ class TransactionHandle(models.Model):
     def pos_system_sync(self, data):
          
         pos_contact = self.env['wallet.contact'].sudo().search([
-                ('wallet_code', '=', data.get('POSProvide'))], limit=1)
-
+                ('wallet_code', '=', str(data.get('POSProvide')).upper())], limit=1)
+        _logger.info(f'----------> POS SYSTEM SYNC CONTACT: {pos_contact.api_url}')
         if not pos_contact.api_url:
                 results = {
                     "invoice": data.get('invoiceNumber'),
@@ -335,7 +335,7 @@ class TransactionHandle(models.Model):
                     "message": f"POS: [{data.get('posProvide')}] của HĐ ([{data.get('invoiceNumber')}], chưa được khai báo )"
                 }
         _logger.info(f'----------> POS SYSTEM SYNC DATA: {data}')
-        _logger.info(f'----------> POS SYSTEM SYNC CONTACT: {pos_contact}')
+        
         response, error = self._send_request(
                 method='POST',
                 url=f'{pos_contact.api_url}wallet/invoice/sync',
