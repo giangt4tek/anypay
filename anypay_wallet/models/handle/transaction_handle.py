@@ -341,6 +341,7 @@ class TransactionHandle(models.Model):
                 json_data=data,
                 headers={'Content-Type': 'application/json'},
             )
+        _logger.info(f'----------> POS SYSTEM SYNC RESPONSE: {response}')
         if error:
                 return {
                     'status': 'error',
