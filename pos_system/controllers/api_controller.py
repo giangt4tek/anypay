@@ -203,11 +203,12 @@ class _Get_BankApiController(http.Controller):
         
         raw_body = request.httprequest.get_data(as_text=True)
         data = json.loads(raw_body)
-        
+        _logger.info(f'POS----------> POS SYSTEM SYNC DATA RECEIVED: {data}')
+        # Kiểm tra các trường bắt buộc
         required_fields = [
                 'invoiceNumber', 'invoiceDate', 
                 'buyerAccount', 'buyerWallet',
-                'amount', 'secretKey'
+                'amount', 'secretKey','POSProvide'
             ]
        
         for name in required_fields:
