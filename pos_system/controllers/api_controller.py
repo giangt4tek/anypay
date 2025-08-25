@@ -180,7 +180,7 @@ class _Get_BankApiController(http.Controller):
                 }   
 
     def check_access_pos(self, SecretKey, PosProvide):
-        _logger.info(f'----------> CHECK ACCESS POS: {SecretKey} - {PosProvide}')   
+        
         POS = request.env['pos.category'].sudo().search([
             ('secret_key', '=', SecretKey)], limit=1)
         error = None
@@ -203,7 +203,7 @@ class _Get_BankApiController(http.Controller):
         
         raw_body = request.httprequest.get_data(as_text=True)
         data = json.loads(raw_body)
-        _logger.info(f'POS----------> POS SYSTEM SYNC DATA RECEIVED: {data}')
+       
         # Kiểm tra các trường bắt buộc
         required_fields = [
                 'invoiceNumber', 'invoiceDate', 
@@ -230,7 +230,7 @@ class _Get_BankApiController(http.Controller):
         CreateInvoice.update({'buyerWallet': data.get('buyerWallet')})
         CreateInvoice.update({'amount': data.get('amount')})
         CreateInvoice.update({'pos': POS['POSAccount'].id})
-
+        _logger.info(f'----------> POS SYSTEM SYNC CREATE INVOICE DATA: {CreateInvoice}')
     
         invCreate = self.create_invoice(CreateInvoice)  
         invMess =''
@@ -238,7 +238,7 @@ class _Get_BankApiController(http.Controller):
            invMess  = 'Hóa đơn đã được ghi nhận.'
         else:
            invMess= 'Hóa đơn không được ghi nhận.',
-                    
+        _logger.info(f'----------> MESS: {invCreate}')        
         if POS:
             return {
                 'status': True,
