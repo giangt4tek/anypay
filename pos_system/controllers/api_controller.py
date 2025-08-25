@@ -219,10 +219,11 @@ class _Get_BankApiController(http.Controller):
                          'message': f'Trường [{name}] không có dữ liệu'  }
         
         CheckPOS = self.check_access_pos(data['secretKey'], data['POSProvide'])       
-        _logger.info(f'----------> POS SYSTEM SYNC CHECK: {POS}')
+        _logger.info(f'----------> POS SYSTEM SYNC CHECK: {CheckPOS}')
         if not CheckPOS['status']: 
             return CheckPOS
         POS = CheckPOS['POSAccount']
+        _logger.info(f'----------> POS INFOR: {POS}')
         # Xử lý dữ liệu tạo hóa đơn
         CreateInvoice = {}
         CreateInvoice.update({'invoiceNumber': data.get('invoiceNumber')})
