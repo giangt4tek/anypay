@@ -180,11 +180,12 @@ class _Get_BankApiController(http.Controller):
                 }   
 
     def check_access_pos(self, SecretKey, PosProvide):
+        _logger.info(f'----------> CHECK ACCESS POS: {SecretKey} - {PosProvide}')   
         POS = request.env['pos.category'].sudo().search([
             ('secret_key', '=', SecretKey)], limit=1)
         error = None
         PosName = get_system_name('name')
-        if PosProvide != PosName: error = 'Nhà cung cấp POS nhận không phù hợp'
+        if PosProvide.upper() != PosName.upper(): error = 'Nhà cung cấp POS nhận không phù hợp'
         if not POS:  error = f'Tài khoản này không tồn tại trong POS {PosName}'
         if POS and PosProvide == PosName:
             return {

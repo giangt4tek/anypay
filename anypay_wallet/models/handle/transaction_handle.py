@@ -328,13 +328,14 @@ class TransactionHandle(models.Model):
         pos_contact = self.env['wallet.contact'].sudo().search([
                 ('wallet_code', '=', data.get('POSProvide'))], limit=1)
 
-        if not pos_contact or not pos_contact.api_url:
+        if not pos_contact.api_url:
                 results = {
                     "invoice": data.get('invoiceNumber'),
                     "status": 'error',
                     "message": f"POS: [{data.get('posProvide')}] của HĐ ([{data.get('invoiceNumber')}], chưa được khai báo )"
                 }
-
+        _logger.info(f'----------> POS SYSTEM SYNC DATA: {data}')
+        _logger.info(f'----------> POS SYSTEM SYNC CONTACT: {pos_contact}')
         response, error = self._send_request(
                 method='POST',
                 url=f'{pos_contact.api_url}wallet/invoice/sync',
