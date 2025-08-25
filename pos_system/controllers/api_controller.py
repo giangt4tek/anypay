@@ -232,6 +232,7 @@ class _Get_BankApiController(http.Controller):
         CreateInvoice.update({'buyerWallet': data.get('buyerWallet')})
         CreateInvoice.update({'amount': data.get('amount')})
         CreateInvoice.update({'pos': POS})
+        CreateInvoice.update({'description': ''})
         _logger.info(f'----------> POS SYSTEM SYNC CREATE INVOICE DATA: {CreateInvoice}')
     
         invCreate = self.create_invoice(CreateInvoice)  
