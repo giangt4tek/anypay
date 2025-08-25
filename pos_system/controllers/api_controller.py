@@ -218,7 +218,7 @@ class _Get_BankApiController(http.Controller):
                          'message': f'Trường [{name}] không có dữ liệu'  }
         
         POS = self.check_access_pos(data['secretKey'], data['POSProvide'])       
-        
+        _logger.info(f'----------> POS SYSTEM SYNC CHECK: {POS}')
         if not POS['status']: 
             return POS
         
